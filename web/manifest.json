@@ -1,6 +1,6 @@
 {
-    "name": "i_carry",
-    "short_name": "i_carry",
+    "name": "confirmation_agent_app",
+    "short_name": "confirmation_agent_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

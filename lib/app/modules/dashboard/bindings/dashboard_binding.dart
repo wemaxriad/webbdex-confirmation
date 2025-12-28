@@ -1,12 +1,11 @@
+import 'package:confirmation_agent_app/app/modules/order/controller/order_controller.dart';
 import 'package:get/get.dart';
-import 'package:i_carry/app/modules/dashboard/controller/dashboard_controller.dart';
+import '../controller/dashboard_controller.dart';
 
-class DashboardBinding extends Bindings{
-
+class DashboardBinding extends Bindings {
   @override
   void dependencies() {
-    // The LanguageController is now provided globally in main.dart.
-    // This binding only needs to register the DashboardController.
     Get.lazyPut<DashboardController>(() => DashboardController());
+    Get.lazyPut<MyOrdersController>(() => MyOrdersController());
   }
 }

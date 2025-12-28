@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.wemax" "\0"
-            VALUE "FileDescription", "i_carry" "\0"
+            VALUE "CompanyName", "com.example" "\0"
+            VALUE "FileDescription", "confirmation_agent_app" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "i_carry" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.wemax. All rights reserved." "\0"
-            VALUE "OriginalFilename", "i_carry.exe" "\0"
-            VALUE "ProductName", "i_carry" "\0"
+            VALUE "InternalName", "confirmation_agent_app" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
+            VALUE "OriginalFilename", "confirmation_agent_app.exe" "\0"
+            VALUE "ProductName", "confirmation_agent_app" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

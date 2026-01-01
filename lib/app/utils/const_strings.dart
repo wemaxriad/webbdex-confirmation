@@ -4,6 +4,7 @@ class ConstString {
   static const String emailOrUsername = "Email or username";
   static const String plzEnterYourEmail = 'Please enter your email';
   static const String email = "Email";
+  static const String mobile = "Phone Number";
   static const String pass = "Password";
   static const String plzEnterPass = 'Please enter your password';
   static const String enterPass = 'Enter password';
@@ -26,6 +27,7 @@ class ConstString {
   static const String enterEmailToGetInstruction =
       "Enter the email you used to creat account and we’ll send instruction for restting password";
   static const String enterEmail = "Enter email";
+  static const String enterMobile = "Enter phone number";
   static const String makeSureRepeatedPassCorrectly =
       'Make sure you repeated new password correctly';
   static const String sendInstruction = "Send Instructions";

@@ -11,21 +11,14 @@ import '../../../utils/const_strings.dart';
 import '../../../utils/constant_colors.dart';
 import '../../../utils/custom_input.dart';
 import '../controllers/auth_controller.dart';
+import 'components/dropdowns/country_dropdown.dart';
 import 'components/email_name_fields.dart';
 import 'components/signup_phone_pass.dart';
 
 class SignupPage extends StatelessWidget {
   final AuthController authController = Get.find<AuthController>();
-  final SignUpController signUpController = Get.put(SignUpController());
-
   // Declare controllers internally
-  final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController userNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController zipCodeController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+
 
   final RxBool termsAgree = false.obs;
 
@@ -51,30 +44,24 @@ class SignupPage extends StatelessWidget {
                     children: [
                       const SizedBox(height: 33),
                       EmailNameFields(
-                        fullNameController: fullNameController,
-                        userNameController: userNameController,
-                        emailController: emailController,
+                        fullNameController: authController.fullNameController,
+                        userNameController:  authController.userNameController,
+                        emailController:  authController.emailController,
+                        mobileController:  authController.mobileController,
                       ),
                       const SizedBox(height: 15),
-                      const CountryStatesDropdowns(),
-                      const SizedBox(height: 15),
-                      labelCommon(ConstString.zipCode),
-                      CustomInput(
-                        controller: zipCodeController,
-                        validation: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter ZIP code';
-                          }
-                          return null;
-                        },
-                        hintText: ConstString.enterZip,
-                        paddingHorizontal: 20,
-                        textInputAction: TextInputAction.next,
+                      // Country dropdown ===============>
+                      labelCommon(ConstString.chooseCountry),
+                      CountryDropdown(
+                        isFromDeliveryPage: false,
                       ),
+                      const SizedBox(
+                        height: 25,
+                      ),
+
                       SignupPhonePass(
-                        phoneController: phoneController,
-                        passController: passwordController,
-                        confirmPassController: confirmPasswordController,
+                        passController:  authController.passwordController,
+                        confirmPassController:  authController.confirmPasswordController,
                       ),
                       const SizedBox(height: 10),
                       Obx(() => Row(

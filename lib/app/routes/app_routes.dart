@@ -1,4 +1,5 @@
 class AppRoutes {
+  static const SPLASH = '/splash';
   static const DASHBOARD = '/dashboard';
   static const SIGNIN = '/signin';
   static const SIGNUP = '/signup';

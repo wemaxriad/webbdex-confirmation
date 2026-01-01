@@ -42,26 +42,6 @@ class ProfileView extends StatelessWidget {
             // 2. VISUAL HEADER (The red section)
             Stack(
               children: [
-                // Red Background Block
-                // Container(
-                //   height: 100, // Height for the visible red block
-                //   decoration: const BoxDecoration(
-                //     color: kPrimaryColor,
-                //   ),
-                // ),
-                // // Profile Text
-                // const Padding(
-                //   padding: EdgeInsetsDirectional.only(top: 10, left: 16),
-                //   child: Text(
-                //     "Profile",
-                //     style: TextStyle(
-                //       color: Colors.white,
-                //       fontWeight: FontWeight.bold,
-                //       fontSize: 20,
-                //     ),
-                //   ),
-                // ),
-
                 // 3. MAIN PROFILE CARD (Positioned slightly into the red block)
                 Padding(
                   padding: const EdgeInsetsDirectional.only(top: 20, end: 16.0, start: 16.0),
@@ -119,21 +99,6 @@ class ProfileView extends StatelessWidget {
                 Get.toNamed(AppRoutes.ORDER);
               },
             ),
-            // _buildMenuItem(
-            //   title: "Refund products",
-            //   icon: Icons.undo,
-            //   onTap: () {/* Navigate to Refunds */},
-            // ),
-            // _buildMenuItem(
-            //   title: "Support Ticket",
-            //   icon: Icons.person_outline,
-            //   onTap: () {/* Navigate to Support */},
-            // ),
-            // _buildMenuItem(
-            //   title: "Shipping password",
-            //   icon: Icons.home_outlined,
-            //   onTap: () {/* Navigate to Shipping Password */},
-            // ),
             _buildMenuItem(
               title: "Terms & Condition",
               icon: Icons.article_outlined,
@@ -166,7 +131,6 @@ class ProfileView extends StatelessWidget {
                     textCancel: "No",
                     onConfirm: () {
                       controller.logout();
-                      Get.offAllNamed(AppRoutes.SIGNIN);
                     },
                   );
                 },

@@ -58,6 +58,7 @@ class EditProfileView extends StatelessWidget {
               fullNameController: controller.fullNameController,
               userNameController: controller.userNameController,
               emailController: controller.emailController,
+              mobileController: controller.mobileController,
             ),
             const SizedBox(height: 15),
             const CountryStatesDropdowns(),

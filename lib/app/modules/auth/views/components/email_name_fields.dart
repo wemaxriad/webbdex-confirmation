@@ -14,11 +14,13 @@ class EmailNameFields extends StatelessWidget {
     required this.fullNameController,
     required this.userNameController,
     required this.emailController,
+    required this.mobileController,
   }) : super(key: key);
 
   final TextEditingController fullNameController;
   final TextEditingController userNameController;
   final TextEditingController emailController;
+  final TextEditingController mobileController;
 
   final AuthController _authController = Get.find<AuthController>();
 
@@ -59,22 +61,10 @@ class EmailNameFields extends StatelessWidget {
           },
           hintText: tr(ConstString.enterUsername),
           textInputAction: TextInputAction.next,
-          onChanged: (v) {
-            // Call your controller method to check username availability
-           // _authController.checkUsername(v, context);
+          onChanged: (v) {;
           },
         ),
 
-        // Obx(() {
-        //   // Show username status message reactively
-        //   // if (_authController.usernameData.value.isNotEmpty) {
-        //   //   return paragraphCommon(_authController.usernameData.value, color: successColor);
-        //   // } else {
-        //   //   return const SizedBox.shrink();
-        //   // }
-        // }),
-
-        //gapH(16),
 
         // Email
         labelCommon(tr(ConstString.email)),
@@ -88,6 +78,21 @@ class EmailNameFields extends StatelessWidget {
             return null;
           },
           hintText: tr(ConstString.enterEmail),
+          textInputAction: TextInputAction.next,
+        ),
+
+        // Mobile
+        labelCommon(tr(ConstString.mobile)),
+        CustomInput(
+          controller: mobileController,
+          paddingHorizontal: 20,
+          validation: (value) {
+            if (value == null || value.isEmpty) {
+              return tr(ConstString.plzEnterYourEmail);
+            }
+            return null;
+          },
+          hintText: tr(ConstString.enterMobile),
           textInputAction: TextInputAction.next,
         ),
       ],

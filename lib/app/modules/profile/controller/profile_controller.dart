@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../auth/controllers/auth_controller.dart';
+
 class ProfileController extends GetxController {
   // Mock login state for demonstration
   var isLoggedIn = true.obs;
@@ -34,5 +36,6 @@ class ProfileController extends GetxController {
 
   void logout() {
     isLoggedIn.value = false;
+    Get.find<AuthController>().userLogout();
   }
 }

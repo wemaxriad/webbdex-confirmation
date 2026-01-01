@@ -13,14 +13,20 @@ import 'package:confirmation_agent_app/app/modules/termsandcondition/binding/ter
 import 'package:confirmation_agent_app/app/modules/termsandcondition/view/terms_view.dart';
 import 'package:get/get.dart';
 
+import '../SplashScreen/splash_screen.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
-  static const INITIAL = AppRoutes.DASHBOARD;
+  static const INITIAL = AppRoutes.SPLASH;
 
   static final routes = [
+    GetPage(
+      name: AppRoutes.SPLASH,
+      page: () => const SplashScreen(),
+      binding: AuthBinding()
+    ),
     GetPage(
       name: AppRoutes.DASHBOARD,
       page: () => const DashboardView(),

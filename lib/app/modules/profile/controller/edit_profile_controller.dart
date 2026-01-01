@@ -15,6 +15,7 @@ class EditProfileController extends GetxController {
   late TextEditingController phoneController;
   late TextEditingController zipCodeController;
   late TextEditingController userNameController;
+  late TextEditingController mobileController;
 
   @override
   void onInit() {

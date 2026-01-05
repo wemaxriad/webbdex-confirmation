@@ -11,6 +11,10 @@ class ApiList {
   static String? login = "${server!}/confirmation-agent/login";
   static String? registerUser = "${server!}/confirmation-agent/register";
   static String? countryList = "${server!}/confirmation-agent/country";
+  static String? profile = "${server!}/confirmation-agent/profile";
+  static String? dashboard = "${server!}/confirmation-agent/dashboard";
+  static String? documentTypes = "${server!}/confirmation-agent/document-types";
+  static String? confirmationDocumentsStore = "${server!}/confirmation-agent/documents/store";
   static String? logout = "${server!}sign-out";
   static String? refreshToken = "${server!}refresh";
   static String? deleteAccount = '${server!}account/delete';

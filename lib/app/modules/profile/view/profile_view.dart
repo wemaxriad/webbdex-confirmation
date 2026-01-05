@@ -1,9 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:confirmation_agent_app/app/routes/app_routes.dart';
 import 'package:confirmation_agent_app/app/utils/common_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../helper/helper.dart';
 import '../../../utils/constant_colors.dart';
 import '../controller/profile_controller.dart';
+import 'confirmation_agent_documents_view.dart';
+import 'shimmer/profile_shimmer_view.dart';
 
 // Define a primary color based on the image (a bright red/pink)
 //const Color kPrimaryColor = Color(0xffFF3B5D);
@@ -19,18 +23,19 @@ class ProfileView extends StatelessWidget {
       backgroundColor: const Color(0xffF5F5F5), // Light gray background
 
       body: Obx(() {
-        return controller.isLoggedIn.value
-            ? _loggedInView(controller)
-            : _notLoggedInView();
+        if (controller.isLoading.value) {
+          return const ProfileShimmerView();
+        }
+
+        return profileView(controller);
       }),
     );
   }
 
   /// ---------------- Logged In UI ----------------
-  Widget _loggedInView(ProfileController controller) {
+  Widget profileView(ProfileController controller) {
     return RefreshIndicator(
       onRefresh: controller.refreshProfile,
-
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,19 +73,25 @@ class ProfileView extends StatelessWidget {
                         // --- Contact Details (Middle Part of the Card) ---
                         _buildContactRow(
                           icon: Icons.phone,
-                          value: controller.phone.value,
+                          value: controller.userDetails.value?.mobile??'',
                         ),
                         const SizedBox(height: 10),
 
                         _buildContactRow(
                           icon: Icons.email,
-                          value: controller.email.value,
+                          value: controller.userDetails.value?.email??"",
+                        ),
+                        const SizedBox(height: 10),
+
+                        _buildContactRow(
+                          icon: Icons.location_city,
+                          value: controller.userDetails.value?.country??'',
                         ),
                         const SizedBox(height: 10),
 
                         _buildContactRow(
                           icon: Icons.location_on,
-                          value: controller.country.value,
+                          value: controller.userDetails.value?.address??'',
                         ),
                       ],
                     ),
@@ -91,6 +102,19 @@ class ProfileView extends StatelessWidget {
 
             const SizedBox(height: 10),
 
+            // --- Menu List (Functional Section) ---
+            _buildMenuItem(
+              title: "My Documents",
+              icon: Icons.receipt_long,
+              onTap: () {
+                Get.to(
+                      () => const ConfirmationAgentDocumentsView(),
+                  transition: Transition.rightToLeft,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              },
+            ),
             // --- Menu List (Functional Section) ---
             _buildMenuItem(
               title: "My orders",
@@ -142,83 +166,64 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  /// ---------------- NOT Logged In ----------------
-  Widget _notLoggedInView() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/notlogin.png', height: 160),
-            const SizedBox(height: 12),
-            const Text(
-              "Not Logged In",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              "Your account information is not available",
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 20),
-            buttonPrimary(
-              "Login",
-              () {
-                Get.toNamed(AppRoutes.SIGNIN);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// ---------- Reusable Widgets ----------
 
   // Profile Header in the Card
   Widget _buildProfileHeader(ProfileController controller) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Obx(() => CircleAvatar(
-              radius: 30,
-              backgroundImage: AssetImage(controller.profileImage.value),
-            )),
+        Obx(
+              () => CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.transparent,
+            child: ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: controller.userDetails.value?.image ?? '',
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                placeholder: (context, url) =>
+                const Icon(Icons.person, size: 30),
+                errorWidget: (context, url, error) =>
+                const Icon(Icons.person, size: 30),
+              ),
+            ),
+          ),
+        ),
         const SizedBox(width: 15),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                controller.name.value,
+                controller.userDetails.value?.name??'',
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                "Member since ${controller.memberSince.value}",
+                "Member since ${formatMonthYear(controller.userDetails.value?.createdAt??'')}",
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
             ],
           ),
         ),
         // --- EDIT ICON ---
-        InkWell(
-          onTap: () {
-            Get.toNamed(AppRoutes.EDIT_PROFILE);
-          },
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.edit, color: primaryColor, size: 18),
-          ),
-        ),
+        // InkWell(
+        //   onTap: () {
+        //     Get.toNamed(AppRoutes.EDIT_PROFILE);
+        //   },
+        //   child: Container(
+        //     padding: const EdgeInsets.all(6),
+        //     decoration: BoxDecoration(
+        //       color: primaryColor.withOpacity(0.1),
+        //       borderRadius: BorderRadius.circular(8),
+        //     ),
+        //     child: const Icon(Icons.edit, color: primaryColor, size: 18),
+        //   ),
+        // ),
       ],
     );
   }

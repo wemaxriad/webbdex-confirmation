@@ -29,10 +29,10 @@ class EditProfileView extends StatelessWidget {
             Center(
               child: Stack(
                 children: [
-                  Obx(() => CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage(controller.profileController.profileImage.value),
-                      )),
+                  // Obx(() => CircleAvatar(
+                  //       radius: 50,
+                  //       backgroundImage: AssetImage(controller.profileController??''),
+                  //     )),
                   Positioned(
                     bottom: 0,
                     right: 0,

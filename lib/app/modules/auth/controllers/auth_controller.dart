@@ -48,10 +48,17 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     getCountryList();
+    _initToken();
     // TODO: implement onInit
     super.onInit();
 
   }
+
+  Future<void> _initToken() async {
+    final token = await userService.getToken();
+    Server.initToken(token: token.toString());
+  }
+
   // ------------------------- LOGIN -------------------------
   void signIn() async {
     if (!formKey.currentState!.validate()) {
@@ -73,7 +80,7 @@ class AuthController extends GetxController {
         userService.saveString(key: 'userID', value: loginData.users?.id.toString());
         isUser.value = true;
 
-        Server.initClass(token: bearerToken);
+        Server.initToken(token: bearerToken);
         emailController.clear();
         passwordController.clear();
         isLoading(false);
@@ -125,7 +132,7 @@ class AuthController extends GetxController {
         userService.saveString(key: 'userID', value: loginData.users?.id.toString());
         isUser.value = true;
 
-        Server.initClass(token: bearerToken);
+        Server.initToken(token: bearerToken);
         emailController.clear();
         passwordController.clear();
         isLoading(false);
@@ -187,7 +194,7 @@ class AuthController extends GetxController {
           userService.saveBoolean(key: 'is-user', value: true);
           userService.saveString(key: 'token', value: refreshData.token);
           userService.saveString(key: 'userID', value: refreshData.users!.id.toString());
-          Server.initClass(token: newToken);
+          Server.initToken(token: newToken);
           Get.offNamed(AppRoutes.DASHBOARD);
           return true;
         } catch (e) {

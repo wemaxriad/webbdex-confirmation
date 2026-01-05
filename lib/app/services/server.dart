@@ -8,7 +8,7 @@ import 'api-list.dart';
 class Server {
   static String? bearerToken;
 
-  static initClass({String? token}) {
+  static initToken({String? token}) {
     bearerToken = token!;
   }
 

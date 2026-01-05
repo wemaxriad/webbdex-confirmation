@@ -2,22 +2,27 @@ import 'package:confirmation_agent_app/app/modules/payment/view/payment_main_vie
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:shimmer/shimmer.dart';
 // Local imports
 import '../../../globalController/global_controller.dart';
+import '../../profile/controller/profile_controller.dart';
 import '../controller/dashboard_controller.dart';
 import '../../balance/view/balance_view.dart';
 import '../../balance/controller/balance_controller.dart';
 // Important: Global Controller for Custom AppBar
 import '../../profile/view/profile_view.dart'; // Ensure ProfileView is imported
 // ... (Other imports)
-import '../../order/view/order_list_view.dart'; // Import the new file
+import '../../order/view/order_list_view.dart';
+import 'documentStatusCard.dart';
+import 'shimmer/dashboard_shimmer_view.dart'; // Import the new file
 
 class DashboardView extends GetView<DashboardController> {
-  const DashboardView({super.key});
+   DashboardView({super.key});
 
   static const Color kMainColor = Color(0xffFF3B30);
   // Red color from your theme
   static const Color textWhiteColor = Colors.white;
+  final ProfileController profileController = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +34,7 @@ class DashboardView extends GetView<DashboardController> {
           case 0:
             return dashboardTab(controller);
           case 1:
-            return const OrderListView(); // Use the new View here
+            return const OrderListView();
           case 2:
             return const PaymentMainView();
           case 3:
@@ -41,6 +46,8 @@ class DashboardView extends GetView<DashboardController> {
       bottomNavigationBar: _buildBottomNav(),
     );
   }
+
+
 
   // --- Helper to build App Bar based on index ---
   PreferredSizeWidget _buildResponsiveAppBar(BuildContext context) {
@@ -191,177 +198,139 @@ class DashboardView extends GetView<DashboardController> {
       onRefresh: controller.refreshDashboard,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: kMainColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(25),
-                  bottomRight: Radius.circular(25),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const DashboardShimmerView();
+          }
+          if(controller.userDetails.value?.confirmationAgentDetail?.status != 3) {
+            var status = controller.userDetails.value?.confirmationAgentDetail?.status??1;
+            return DocumentStatusCard(
+              isSubmitted: status == 1 ?false:status == 1 ? true:true,
+              status: status,
+            );
+          }
+
+          /// 🔹 YOUR ORIGINAL UI (unchanged)
+          return
+            Column(
+            children: [
+              // ---------- HEADER ----------
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: kMainColor,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(25),
+                    bottomRight: Radius.circular(25),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                      end: 20, start: 20, bottom: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('welcome'.tr,
+                          style: const TextStyle(
+                              fontSize: 17, color: Colors.white)),
+                       Text("${controller.userDetails.value!.name}",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
+                      const SizedBox(height: 10),
+                      InkWell(
+                        onTap: () {
+                          Get.to(
+                                () => const BalanceView(),
+                            binding: BindingsBuilder(() {
+                              Get.put(BalanceController());
+                            }),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: const [
+                              Icon(Icons.account_balance_wallet,
+                                  color: Colors.white),
+                              SizedBox(width: 10),
+                              Text("Check Balance",
+                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                              Spacer(),
+                              Icon(Icons.arrow_forward_ios,
+                                  size: 18, color: Colors.grey),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(
-                    end: 20, start: 20, bottom: 20),
+
+              // ---------- BODY ----------
+              Padding(
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      childAspectRatio: 3 / 2,
                       children: [
-                        Text(
-                          'welcome'.tr,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const Text(
-                          "sharif",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        statCard("Total Orders",
+                            controller.totalOrders.value, Colors.blue),
+                        statCard("Confirmed Orders",
+                            controller.totalConfirmed.value, Colors.green),
+                        statCard("Canceled Orders",
+                            controller.totalCanceled.value, Colors.red),
+                        statCard("Pending Orders",
+                            controller.totalPending.value, Colors.orange),
                       ],
                     ),
+                    const SizedBox(height: 20),
+                    Text("Recent Orders",
+                        style: Theme.of(Get.context!).textTheme.titleLarge),
                     const SizedBox(height: 10),
-                    // BALANCE BUTTON
-                    InkWell(
-                      onTap: () {
-                        Get.to(
-                          () => const BalanceView(),
-                          binding: BindingsBuilder(() {
-                            Get.put(BalanceController());
-                          }),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: kMainColor,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.account_balance_wallet,
-                                size: 24,
-                                color: Colors.white,
-                              ),
+                    SizedBox(
+                      height: 300,
+                      child: ListView.separated(
+                        itemCount: controller.recentOrders.length,
+                        separatorBuilder: (_, __) => const Divider(),
+                        itemBuilder: (_, index) {
+                          final order = controller.recentOrders[index];
+                          return ListTile(
+                            leading:
+                            CircleAvatar(child: Text(order.id.toString())),
+                            title: Text("Order #${order.id}"),
+                            subtitle: Text(
+                              "Amount: \$${order.items.fold<double>(0,
+                                      (s, i) => s + i.price * i.qty).toStringAsFixed(2)}",
                             ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'check_balance'.tr,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Spacer(),
-                            const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 18,
-                              color: Colors.grey,
-                            ),
-                          ],
-                        ),
+                            trailing: orderStatusChip(order.status),
+                          );
+                        },
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 3 / 2,
-                    padding: const EdgeInsetsDirectional.only(top: 16),
-                    children: [
-                      statCard(
-                        "Total Orders",
-                        controller.totalOrders.value,
-                        Colors.blue,
-                      ),
-                      statCard(
-                        "Confirmed Orders",
-                        controller.totalConfirmed.value,
-                        Colors.green,
-                      ),
-                      statCard(
-                        "Canceled Orders",
-                        controller.totalCanceled.value,
-                        Colors.red,
-                      ),
-                      statCard(
-                        "Pending Orders",
-                        controller.totalPending.value,
-                        Colors.orange,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Recent Orders",
-                    style: Theme.of(Get.context!).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 300,
-                    child: Obx(
-                      () => ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: controller.recentOrders.length,
-                        separatorBuilder: (_, __) => const Divider(),
-                        itemBuilder: (context, index) {
-                          final order = controller.recentOrders[index];
-                          return ListTile(
-                            leading: CircleAvatar(
-                              child: Text(order.id.toString()),
-                            ),
-                            title: Text("Order #${order.id}"),
-                            subtitle: Text(
-                              "Amount: \$${order.items.fold(0.0, (sum, item) => sum + item.price * item.qty).toStringAsFixed(2)}",
-                            ),
-                            trailing: SizedBox(
-                              width: 100, // Adjust width as needed
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: orderStatusChip(order.status),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }
+
 
   Widget statCard(String title, int value, Color color) {
     return Card(
@@ -419,7 +388,10 @@ class DashboardView extends GetView<DashboardController> {
 
   Widget _buildBottomNav() {
     return Obx(
-      () => Container(
+      () => (controller.userDetails.value?.confirmationAgentDetail?.status ?? 1) != 3
+          ? SizedBox()
+          :
+      Container(
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -457,4 +429,68 @@ class DashboardView extends GetView<DashboardController> {
       ),
     );
   }
+
+
 }
+
+
+class ReviewStatusCard extends StatelessWidget {
+  const ReviewStatusCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Icon
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.hourglass_top,
+                color: Colors.orange,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Text Content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    '⏳ Documents Under Review',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Your documents have been submitted and are currently under review. '
+                        'You will be able to access all features once your documents are approved.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.black54,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }}

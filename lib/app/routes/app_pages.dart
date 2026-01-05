@@ -29,7 +29,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.DASHBOARD,
-      page: () => const DashboardView(),
+      page: () =>  DashboardView(),
       binding: DashboardBinding(),
     ),
     GetPage(

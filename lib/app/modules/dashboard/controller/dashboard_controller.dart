@@ -1,15 +1,28 @@
-import 'package:confirmation_agent_app/app/services/mock_order_service.dart';
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import '../../../model/order_model.dart';
+import '../../../services/server.dart';
+import '../../../services/user-service.dart';
+import '../model/dashboardModel.dart';
+import '../service/dashboard_service.dart';
 
 class DashboardController extends GetxController {
 
-  final MockOrderService _orderService = MockOrderService();
+  Server server = Server();
+  UserService userService = UserService();
 
   // FIX: Add currentIndex for the bottom navigation bar management
   var currentIndex = 0.obs;
 
+  final DashboardService _service = DashboardService();
+
+  RxBool isLoading = true.obs;
+
+  RxInt totalAssignedOrder = 0.obs;
+  RxInt totalApprovedOrder = 0.obs;
+  RxInt totalCancelOrder = 0.obs;
   // --- Dashboard Data ---
   var totalBalance = 15000.obs;
   var pendingBalance = 2345.obs;
@@ -32,66 +45,37 @@ class DashboardController extends GetxController {
     'Canceled',
   ];
 
+  RxList<LastAssignedOrders> lastOrders = <LastAssignedOrders>[].obs;
+  Rx<UserDetails?> userDetails = Rx<UserDetails?>(null);
+
   @override
   void onInit() {
-    _loadOrders();
     super.onInit();
+    getDashboard();
+  }
+
+  Future<void> getDashboard() async {
+    try {
+      isLoading(true);
+
+      final DashboardData? data = await _service.getDashboardData();
+
+      if (data != null) {
+        totalAssignedOrder.value = data.totalAssignedOrder ?? 0;
+        totalApprovedOrder.value = data.totalApprovedOrder ?? 0;
+        totalCancelOrder.value = data.totalCancelOrder ?? 0;
+
+        lastOrders.assignAll(data.lastAssignedOrders ?? []);
+        userDetails.value = data.userDetails;
+      }
+    } finally {
+      isLoading(false);
+    }
   }
 
   Future<void> refreshDashboard() async {
-    // Simulate a network call to refresh data
-    await Future.delayed(const Duration(seconds: 2));
-    _orderService.refreshOrders();
-    _loadOrders();
-    Get.snackbar('Success', 'Dashboard has been refreshed');
-  }
-
-  void _loadOrders() {
-    final orders = _orderService.getOrders();
-    allOrders.value = orders;
-    recentOrders.value = orders.take(5).toList();
-
-    // --- Calculate Stats ---
-    totalOrders.value = allOrders.length;
-    totalConfirmed.value = allOrders.where((o) => o.status == 'Confirmed').length;
-    totalCanceled.value = allOrders.where((o) => o.status == 'Canceled').length;
-    totalPending.value = allOrders.where((o) => o.status == 'Pending').length;
-  }
-
-  // --- Status Change Logic ---
-  void updateSelectedStatus(String? newStatus) {
-    if (newStatus != null) {
-      selectedStatus.value = newStatus;
-    }
-  }
-
-  void updateStatusNotes(String notes) {
-    statusNotes.value = notes;
-  }
-
-  void submitStatusChange(int orderId) {
-    if (selectedStatus.value == 'Select Status') {
-      Get.snackbar('Error', 'Please select a new status.', snackPosition: SnackPosition.BOTTOM);
-      return;
-    }
-
-    debugPrint('Submitting status change for Order $orderId: ${selectedStatus.value} with notes: ${statusNotes.value}');
-
-    final orderIndex = allOrders.indexWhere((order) => order.id == orderId);
-
-    if (orderIndex != -1) {
-      final updatedOrder = allOrders[orderIndex].copyWith(status: selectedStatus.value);
-      allOrders[orderIndex] = updatedOrder;
-      
-      // Recalculate stats
-      _loadOrders();
-
-      selectedStatus.value = 'Select Status';
-      statusNotes.value = '';
-      Get.back();
-      Get.snackbar('Success', 'Order $orderId status updated.', snackPosition: SnackPosition.BOTTOM);
-    } else {
-      Get.snackbar('Error', 'Order not found.', snackPosition: SnackPosition.BOTTOM);
-    }
+    await getDashboard();
+    Get.snackbar('Success', 'Dashboard refreshed');
   }
 }
+

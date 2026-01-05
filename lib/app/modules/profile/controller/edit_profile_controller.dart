@@ -21,25 +21,25 @@ class EditProfileController extends GetxController {
   void onInit() {
     super.onInit();
     // Initialize controllers with the current profile data
-    fullNameController = TextEditingController(text: profileController.name.value);
-    emailController = TextEditingController(text: profileController.email.value);
-    phoneController = TextEditingController(text: profileController.phone.value);
-
-    // Placeholders for username and zip, as they aren't in the ProfileController
-    userNameController = TextEditingController(text: "asm");
-    zipCodeController = TextEditingController(text: "12345");
-
-    // Set the initial value for the country dropdown
-    signUpController.selectedCountry.value = profileController.country.value;
+    // fullNameController = TextEditingController(text: profileController.name.value);
+    // emailController = TextEditingController(text: profileController.email.value);
+    // phoneController = TextEditingController(text: profileController.phone.value);
+    //
+    // // Placeholders for username and zip, as they aren't in the ProfileController
+    // userNameController = TextEditingController(text: "asm");
+    // zipCodeController = TextEditingController(text: "12345");
+    //
+    // // Set the initial value for the country dropdown
+    // signUpController.selectedCountry.value = profileController.country.value;
   }
 
   // --- Update Profile Logic ---
   void updateProfile() {
     // Update the ProfileController with the new values from the form
-    profileController.name.value = fullNameController.text;
-    profileController.email.value = emailController.text;
-    profileController.phone.value = phoneController.text;
-    profileController.country.value = signUpController.selectedCountry.value ?? '';
+    // profileController.name.value = fullNameController.text;
+    // profileController.email.value = emailController.text;
+    // profileController.phone.value = phoneController.text;
+    // profileController.country.value = signUpController.selectedCountry.value ?? '';
 
     Get.back(); // Go back to the profile page
     Get.snackbar('Success', 'Profile updated successfully!');
@@ -51,7 +51,7 @@ class EditProfileController extends GetxController {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      profileController.profileImage.value = image.path;
+      // profileController.profileImage.value = image.path;
       Get.snackbar('Success', 'Profile image updated!');
     } else {
       Get.snackbar('Info', 'No image selected.');

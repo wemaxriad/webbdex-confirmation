@@ -4,6 +4,7 @@ import 'package:get/get.dart' as dataGet;
 
 import '../../../services/api-list.dart';
 import '../../../services/server.dart';
+import '../../balance/model/walletHistoryModel.dart';
 import '../model/documentTypesModel.dart';
 import '../model/profileModel.dart';
 import 'dart:io';
@@ -25,6 +26,20 @@ class ProfiledService {
 
     return null;
   }
+
+  Future<WalletData?> getBalance() async {
+    final response =
+    await server.getRequestToken(endPoint: ApiList.wallet!);
+
+    if (response != null && response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      final model = WalletHistoryModel.fromJson(jsonResponse);
+      return model.data;
+    }
+
+    return null;
+  }
+
   Future<DocumentTypesModel?> getDocumentTypeData() async {
     final response =
     await server.getRequestNotToken(endPoint: ApiList.documentTypes!);

@@ -103,11 +103,6 @@ class AuthController extends GetxController {
       return; // Form validation failed
     }
 
-    // if (!termsAgree.value) {
-    //   Get.snackbar("Terms", "You must agree to the terms to continue");
-    //   return;
-    // }
-
     isLoading(true);
 
     Map body = {

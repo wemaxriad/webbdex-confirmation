@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../model/order_model.dart';
 import '../../order/controller/order_details_controller.dart';
 import '../../order/view/order_details_view.dart';
+import '../model/orderModel.dart';
 
 class OrderListView extends GetView<MyOrdersController> {
   const OrderListView({super.key});
@@ -44,27 +45,53 @@ class OrderListView extends GetView<MyOrdersController> {
   }
 
   Widget _ordersList(String filterStatus) {
-    return Obx(() {
-      final filtered = controller.allOrders
-          .where((order) => order.status == filterStatus)
-          .toList();
+    return RefreshIndicator(
+      onRefresh: controller.refreshOrders,
+      child: Obx(() {
+        if (controller.isLoading.value &&
+            controller.orderList.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      if (filtered.isEmpty) {
-        return Center(child: Text("No $filterStatus Orders"));
-      }
+        if (controller.orderList.isEmpty) {
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const [
+              SizedBox(height: 300),
+              Center(child: Text("No order list")),
+            ],
+          );
+        }
 
-      return RefreshIndicator(
-        onRefresh: controller.refreshOrders,
-        child: ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            return _OrderCard(filtered[index], context);
+        return NotificationListener<ScrollNotification>(
+          onNotification: (scroll) {
+            if (scroll.metrics.pixels ==
+                scroll.metrics.maxScrollExtent &&
+                !controller.isMoreLoading.value) {
+              controller.getOrderHistoryData();
+            }
+            return false;
           },
-        ),
-      );
-    });
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            itemCount: controller.orderList.length +
+                (controller.isMoreLoading.value ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == controller.orderList.length) {
+                return const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              final item = controller.orderList[index];
+              return _OrderCard(item,context);
+            },
+          ),
+        );
+      }),
+    );
   }
 
   void showChangeStatusDialog(int orderId) {
@@ -305,43 +332,7 @@ class OrderListView extends GetView<MyOrdersController> {
     );
   }
 
-  Widget _OrderCard(Order order, BuildContext context) {
-    final isLocationExpanded = false.obs;
-    final isProductsExpanded = false.obs;
-
-    Widget statusBadge(String status) {
-      Color bgColor;
-      switch (status) {
-        case "Confirmed":
-          bgColor = const Color(0xff39C367);
-          break;
-        case "Canceled":
-          bgColor = Colors.red;
-          break;
-        case "Pending":
-          bgColor = Colors.orange.shade300;
-          break;
-        default:
-          bgColor = Colors.grey;
-      }
-
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Text(
-          status,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      );
-    }
-
+  Widget _OrderCard(OrderList order, BuildContext context) {
     return Card(
       elevation: 2,
       margin: const EdgeInsetsDirectional.only(bottom: 12),
@@ -350,9 +341,9 @@ class OrderListView extends GetView<MyOrdersController> {
         borderRadius: BorderRadius.circular(12),
         onTap: () {
           Get.to(
-            () => OrderDetailsView(orderId: order.id),
+            () => OrderDetailsView(orderId: order.id!),
             binding: BindingsBuilder(() {
-              Get.put(OrderDetailsController(order.id));
+              Get.put(OrderDetailsController(order.id!));
             }),
           );
         },
@@ -369,7 +360,7 @@ class OrderListView extends GetView<MyOrdersController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          order.customerName,
+                          '${order.globalId}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -377,7 +368,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Tracking ID: CO${order.id}",
+                          "Order ID: #${order.id}",
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
@@ -386,9 +377,9 @@ class OrderListView extends GetView<MyOrdersController> {
                       ],
                     ),
                   ),
-                  if (order.status == "Pending")
+                  if (order.status == "pending")
                     ElevatedButton.icon(
-                      onPressed: () => showChangeStatusDialog(order.id),
+                      onPressed: () => showChangeStatusDialog(order.id!),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xff39C367),
                         padding: const EdgeInsets.symmetric(
@@ -417,93 +408,32 @@ class OrderListView extends GetView<MyOrdersController> {
                       ),
                     )
                   else
-                    statusBadge(order.status),
+                    statusBadge(order.status!),
                 ],
               ),
               const Divider(height: 24),
-              Obx(
-                () => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    InkWell(
-                      onTap: () => isProductsExpanded.toggle(),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Product Details",
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                            Icon(
-                              isProductsExpanded.value
-                                  ? Icons.keyboard_arrow_up
-                                  : Icons.keyboard_arrow_down,
-                              size: 24,
-                              color: Colors.grey,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (isProductsExpanded.value)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 8.0,
-                          left: 8.0,
-                          right: 8.0,
-                        ),
-                        child: Column(
-                          children: [
-                            ...order.items.map((item) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(
-                                        item.name,
-                                        style: const TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        'Qty: ${item.qty}',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        'BD ${item.price.toStringAsFixed(3)}',
-                                        textAlign: TextAlign.end,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
+              Row(
+                children: [
+                  Text(' ${order.customerName}'),
+                  Spacer(),
+                  Text(' ${order.createdAt}'),
+                ],
               ),
+
+              Row(
+                children: [
+                  Text('📞 ${order.customerPhone}'),
+                  Spacer(),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.call),
+                    label: const Text('Call Customer'),
+                    onPressed: () => print(''),
+                  ),
+                ],
+              ),
+              Text('📍 ${order.customerEmail}'),
+
+
               const Divider(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -515,7 +445,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        "BD ${order.items.fold(0.0, (sum, item) => sum + item.price * item.qty).toStringAsFixed(3)}",
+                        "${order.totalAmount}",
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -524,6 +454,39 @@ class OrderListView extends GetView<MyOrdersController> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget statusBadge(String status) {
+    Color bgColor;
+    switch (status) {
+      case "Confirmed":
+        bgColor = const Color(0xff39C367);
+        break;
+      case "Canceled":
+        bgColor = Colors.red;
+        break;
+      case "Pending":
+        bgColor = Colors.orange.shade300;
+        break;
+      default:
+        bgColor = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        status,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
         ),
       ),
     );

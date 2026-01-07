@@ -11,46 +11,41 @@ class PaymentMainView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(PaymentTabsController());
 
-    return RefreshIndicator(
-      onRefresh: controller.refreshPayments,
-      child: Column(
-        children: [
-          // 🔥 Top TabBar (NO AppBar)
-          Container(
-            color: Colors.red,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Obx(() {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _tabItem(
-                    title: "Payment Request",
-                    isActive: controller.currentTab.value == 0,
-                    onTap: () => controller.changeTab(0),
-                  ),
-                  _tabItem(
-                    title: "Payment History",
-                    isActive: controller.currentTab.value == 1,
-                    onTap: () => controller.changeTab(1),
-                  ),
-                ],
-              );
-            }),
-          ),
-
-          // 🔥 PageView inside DashboardView
-          Expanded(
-            child: PageView(
-              controller: controller.pageController,
-              onPageChanged: controller.onPageChanged,
-              children: const [
-                PaymentRequestPage(),
-                PaymentHistoryPage(),
+    return Column(
+      children: [
+        Container(
+          color: Colors.red,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Obx(() {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _tabItem(
+                  title: "Payment Request",
+                  isActive: controller.currentTab.value == 0,
+                  onTap: () => controller.changeTab(0),
+                ),
+                _tabItem(
+                  title: "Payment History",
+                  isActive: controller.currentTab.value == 1,
+                  onTap: () => controller.changeTab(1),
+                ),
               ],
-            ),
+            );
+          }),
+        ),
+
+        Expanded(
+          child: PageView(
+            controller: controller.pageController,
+            onPageChanged: controller.onPageChanged,
+            children: const [
+              PaymentRequestPage(),
+              PaymentHistoryPage(),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

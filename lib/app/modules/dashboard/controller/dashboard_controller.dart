@@ -61,6 +61,7 @@ class DashboardController extends GetxController {
       final DashboardData? data = await _service.getDashboardData();
 
       if (data != null) {
+        print(data.totalApprovedOrder);
         totalAssignedOrder.value = data.totalAssignedOrder ?? 0;
         totalApprovedOrder.value = data.totalApprovedOrder ?? 0;
         totalCancelOrder.value = data.totalCancelOrder ?? 0;

@@ -1,13 +1,17 @@
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../profile/service/profile_service.dart';
+import '../model/walletHistoryModel.dart';
+
 class BalanceController extends GetxController {
+  final ProfiledService _service = ProfiledService();
   var isLoading = true.obs;
 
   // Financial data (using double and Rx for currency values)
-  var totalOrderAmount = 0.0.obs;
-  var withdrawableBalance = 0.0.obs;
-  var payableBalance = 0.0.obs;
+  RxString totalAmount = '0.0'.obs;
+  RxString withdrawableBalance = '0.0'.obs;
+  RxString payableBalance = '0.0'.obs;
 
   @override
   void onInit() {
@@ -18,13 +22,13 @@ class BalanceController extends GetxController {
   Future<void> fetchBalanceDetails() async {
     try {
       isLoading(true);
-      // TODO: Replace with your actual API call to fetch balance data
-      await Future.delayed(const Duration(seconds: 1));
+      final WalletData? data = await _service.getBalance();
 
-      // --- Mock Data Adjusted to Match Your Image ---
-      totalOrderAmount.value = 32.00;
-      withdrawableBalance.value = 32.00;
-      payableBalance.value = 390.00;
+      if (data != null) {
+        totalAmount.value  = data.totalBalance??'0.00';
+        withdrawableBalance.value  = data.totalWithdrawPending??'0.00';
+        payableBalance.value =   data.totalWithdrawPaid??'0.00';
+      }
 
     } catch (e) {
       // ...

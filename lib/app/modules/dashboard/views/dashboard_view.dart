@@ -241,8 +241,7 @@ class DashboardView extends GetView<DashboardController> {
                       const SizedBox(height: 10),
                       InkWell(
                         onTap: () {
-                          Get.to(
-                                () => const BalanceView(),
+                          Get.to(() => const BalanceView(),
                             binding: BindingsBuilder(() {
                               Get.put(BalanceController());
                             }),
@@ -287,12 +286,12 @@ class DashboardView extends GetView<DashboardController> {
                       crossAxisSpacing: 8,
                       childAspectRatio: 3 / 2,
                       children: [
-                        statCard("Total Orders",
-                            controller.totalOrders.value, Colors.blue),
+                        statCard("Assign Orders",
+                            controller.totalAssignedOrder.value, Colors.blue),
                         statCard("Confirmed Orders",
-                            controller.totalConfirmed.value, Colors.green),
+                            controller.totalApprovedOrder.value, Colors.green),
                         statCard("Canceled Orders",
-                            controller.totalCanceled.value, Colors.red),
+                            controller.totalCancelOrder.value, Colors.red),
                         statCard("Pending Orders",
                             controller.totalPending.value, Colors.orange),
                       ],
@@ -304,19 +303,18 @@ class DashboardView extends GetView<DashboardController> {
                     SizedBox(
                       height: 300,
                       child: ListView.separated(
-                        itemCount: controller.recentOrders.length,
+                        itemCount: controller.lastOrders.length,
                         separatorBuilder: (_, __) => const Divider(),
                         itemBuilder: (_, index) {
-                          final order = controller.recentOrders[index];
+                          final order = controller.lastOrders[index];
                           return ListTile(
                             leading:
                             CircleAvatar(child: Text(order.id.toString())),
                             title: Text("Order #${order.id}"),
                             subtitle: Text(
-                              "Amount: \$${order.items.fold<double>(0,
-                                      (s, i) => s + i.price * i.qty).toStringAsFixed(2)}",
+                              "Amount: ${order.totalAmount}",
                             ),
-                            trailing: orderStatusChip(order.status),
+                            trailing: orderStatusChip(order.confirmationStatus.toString()),
                           );
                         },
                       ),
@@ -367,13 +365,16 @@ class DashboardView extends GetView<DashboardController> {
   Widget orderStatusChip(String status) {
     Color bgColor;
     switch (status) {
-      case "Confirmed":
+      case "approved":
         bgColor = Colors.green.shade300;
         break;
-      case "Canceled":
+      case "cancel":
         bgColor = Colors.red.shade300;
         break;
-      case "Pending":
+      case "assign":
+        bgColor = Colors.orange.shade300;
+        break;
+        case "de-assign":
         bgColor = Colors.orange.shade300;
         break;
       default:
@@ -381,7 +382,7 @@ class DashboardView extends GetView<DashboardController> {
     }
 
     return Chip(
-      label: Text(status, style: const TextStyle(color: Colors.white)),
+      label: Text(status.toUpperCase(), style: const TextStyle(color: Colors.white)),
       backgroundColor: bgColor,
     );
   }

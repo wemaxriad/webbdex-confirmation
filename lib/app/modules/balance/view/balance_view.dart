@@ -1,159 +1,6 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import '../controller/balance_controller.dart';
-//
-// class BalanceView extends GetView<BalanceController> {
-//   const BalanceView({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // Controller is initialized here if no binding is used.
-//     final controller = Get.put(BalanceController());
-//
-//     return Scaffold(
-//       backgroundColor: const Color(0xffF5F5F5),
-//       appBar: AppBar(
-//         // Assuming your main AppBar style is red
-//         backgroundColor: const Color(0xffFF3B30),
-//         foregroundColor: Colors.white,
-//         title: const Text("Balance Details", style: TextStyle(fontWeight: FontWeight.bold)),
-//       ),
-//       body: Obx(() {
-//         if (controller.isLoading.isTrue) {
-//           return const Center(child: CircularProgressIndicator());
-//         }
-//
-//         return SingleChildScrollView(
-//           padding: const EdgeInsets.all(16.0),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               // 1. Total Order Amount (Primary Card)
-//               _buildBalanceCard(
-//                 title: "Total Order Amount",
-//                 amount: controller.totalOrderAmount.value,
-//                 color: const Color(0xffFF3B30), // Red/Primary Color
-//                 icon: Icons.receipt_long,
-//               ),
-//
-//               const SizedBox(height: 16),
-//
-//               // 2. Withdrawable Balance Card
-//               _buildBalanceCard(
-//                 title: "Withdrawable Balance",
-//                 amount: controller.withdrawableBalance.value,
-//                 color: const Color(0xff39C367), // Green
-//                 icon: Icons.account_balance_wallet,
-//                 buttonText: "Withdraw Now",
-//                 onPressed: () {
-//                   // TODO: Implement navigation/dialog for withdrawal
-//                   Get.snackbar("Action", "Withdrawal initiated for BD ${controller.withdrawableBalance.value.toStringAsFixed(3)}", snackPosition: SnackPosition.BOTTOM);
-//                 },
-//               ),
-//
-//               const SizedBox(height: 16),
-//
-//               // 3. Payable Balance Card
-//               _buildBalanceCard(
-//                 title: "Payable Balance",
-//                 amount: controller.payableBalance.value,
-//                 color: Colors.blueAccent, // Blue
-//                 icon: Icons.payment,
-//               ),
-//
-//               const SizedBox(height: 30),
-//
-//               const Text(
-//                 "Recent Transactions",
-//                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//               ),
-//               const SizedBox(height: 10),
-//               // TODO: Placeholder for a ListView of recent transactions
-//               Center(
-//                 child: Padding(
-//                   padding: const EdgeInsets.all(20.0),
-//                   child: Text(
-//                     "Transaction history goes here.",
-//                     style: TextStyle(color: Colors.grey[600]),
-//                   ),
-//                 ),
-//               )
-//             ],
-//           ),
-//         );
-//       }),
-//     );
-//   }
-//
-//   // --- Reusable Balance Card Widget ---
-//   Widget _buildBalanceCard({
-//     required String title,
-//     required double amount,
-//     required Color color,
-//     required IconData icon,
-//     String? buttonText,
-//     VoidCallback? onPressed,
-//   }) {
-//     return Card(
-//       elevation: 4,
-//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-//       child: Container(
-//         padding: const EdgeInsets.all(20),
-//         decoration: BoxDecoration(
-//           color: Colors.white,
-//           borderRadius: BorderRadius.circular(12),
-//         ),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 Text(
-//                   title,
-//                   style: const TextStyle(fontSize: 16, color: Colors.black54),
-//                 ),
-//                 Icon(icon, color: color, size: 28),
-//               ],
-//             ),
-//             const SizedBox(height: 8),
-//             Text(
-//               "BD ${amount.toStringAsFixed(3)}", // Format: BD X.XXX
-//               style: TextStyle(
-//                 fontSize: 32,
-//                 fontWeight: FontWeight.bold,
-//                 color: color,
-//               ),
-//             ),
-//
-//             if (buttonText != null && onPressed != null) ...[
-//               const Divider(height: 30, thickness: 1, color: Colors.grey),
-//               SizedBox(
-//                 width: double.infinity,
-//                 height: 45,
-//                 child: ElevatedButton(
-//                   onPressed: onPressed,
-//                   style: ElevatedButton.styleFrom(
-//                     backgroundColor: color,
-//                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-//                   ),
-//                   child: Text(
-//                     buttonText,
-//                     style: const TextStyle(color: Colors.white, fontSize: 16),
-//                   ),
-//                 ),
-//               ),
-//             ]
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../utils/constant_colors.dart';
 import '../controller/balance_controller.dart';
 
 class BalanceView extends GetView<BalanceController> {
@@ -161,97 +8,132 @@ class BalanceView extends GetView<BalanceController> {
 
   @override
   Widget build(BuildContext context) {
-    // Controller is initialized here if no binding is used.
     final controller = Get.put(BalanceController());
 
     return Scaffold(
-      // Set the overall screen background to white or light gray
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xffF5F6FA),
       appBar: AppBar(
-        // Assuming your main AppBar style is red
-        backgroundColor: const Color(0xffFF3B30),
-        foregroundColor: Colors.white,
+        backgroundColor: primaryColor,
         title: const Text(
-            "Balance Details",
-            style: TextStyle(fontWeight: FontWeight.bold)
+          'Balance Details',
+          style: TextStyle(color: Colors.white),
         ),
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
-
       body: Obx(() {
-        if (controller.isLoading.isTrue) {
+        if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // This container recreates the main card from your image
+
+              /// 🔹 WALLET CARD
               Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 24),
                 decoration: BoxDecoration(
-                  // Light grey background for the whole balance block
-                  color: const Color(0xffF0F0F0),
-                  borderRadius: BorderRadius.circular(8),
+                  color: primaryColor,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- Card Header ---
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        "Balance Details",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                    const Text(
+                      "My Wallet",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
                       ),
                     ),
-                    const Divider(height: 16, thickness: 1, color: Color(0xffDCDCDC)),
-
-                    // --- Balance Rows ---
-                    _buildBalanceRow(
-                      context,
-                      title: "Total Order Amount",
-                      amount: controller.totalOrderAmount.value,
+                    const SizedBox(height: 8),
+                    Text(
+                      controller.totalAmount.value,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    _buildBalanceRow(
-                      context,
-                      title: "Withdrawable Balance",
-                      amount: controller.withdrawableBalance.value,
-                    ),
-                    _buildBalanceRow(
-                      context,
-                      title: "Payable Balance",
-                      amount: controller.payableBalance.value,
-                      // The payable balance has a slightly darker text in the image
-                      amountColor: Colors.black,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(height: 6),
+                    const Text(
+                      "You can request payment for this Amount",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 16),
 
-              // Placeholder for other elements below the balance box
-              const Text(
-                "Recent Transactions",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              /// 🔹 BALANCE SUMMARY CARD
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Balance Summary",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    _summaryRow(
+                        "Withdrawal Amount ", controller.withdrawableBalance.value),
+                    _summaryRow("Payable Amount",
+                        controller.payableBalance.value),
+
+
+                    const Divider(height: 24),
+
+                    _summaryRow(
+                      "Total Balance",
+                      controller.totalAmount.value,
+                      isBold: true,
+                    ),
+
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Text(
-                    "Transaction history goes here.",
-                    style: TextStyle(color: Colors.grey[600]),
+
+              const SizedBox(height: 24),
+
+              /// 🔹 PAYMENT REQUEST BUTTON (DISABLED)
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade400,
+                    disabledBackgroundColor: Colors.grey.shade400,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "Payment Request",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         );
@@ -259,39 +141,26 @@ class BalanceView extends GetView<BalanceController> {
     );
   }
 
-  // --- Helper Widget to build each row in the balance card ---
-  Widget _buildBalanceRow(
-      BuildContext context, {
-        required String title,
-        required double amount,
-        Color amountColor = Colors.black,
-        FontWeight fontWeight = FontWeight.normal,
-      }) {
-    // The Row padding should only be horizontal, as the vertical space is implicitly
-    // handled by the font size and padding in the parent Container.
+  /// 🔹 SUMMARY ROW
+  Widget _summaryRow(String title, String value, {bool isBold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left side: Title text
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black87, // Dark text
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+              fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
-
-          // Right side: Amount text
           Text(
-            // Use the provided mock values from your controller.
-            // I've used toFixed(2) to match the two decimal places shown in your image (32.00, 390.00)
-            amount.toStringAsFixed(2),
+            value,
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: fontWeight,
-              color: amountColor,
+              fontSize: 14,
+              fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ],

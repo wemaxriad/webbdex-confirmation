@@ -1,90 +1,90 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class PaymentRequestPage extends StatelessWidget {
+import '../controller/payment_tabs_controller.dart';
+
+class PaymentRequestPage extends GetView<PaymentTabsController> {
   const PaymentRequestPage({super.key});
+
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return RefreshIndicator(
+      onRefresh: controller.refreshPayments,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Obx(() {
+          final data = controller.withdrawHistoryData.value;
+          return  Column(
             children: [
-              _balanceCard("Available", "৳8,200.75", Colors.green),
-              const SizedBox(width: 10),
-              _balanceCard("Pending", "৳1,500.00", Colors.orange),
+              Row(
+                children: [
+                  _balanceCard(
+                    "Available",
+                    data?.totalBalance ?? "0.00",
+                    Colors.green,
+                  ),
+                  const SizedBox(width: 10),
+                  _balanceCard(
+                    "Pending",
+                    data?.totalWithdrawPending ?? "0.00",
+                    Colors.orange,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+              _inputField(
+                label: "Amount ",
+                icon: Icons.payments,
+                controller: controller.amountController,
+              ),
+              const SizedBox(height: 12),
+              _inputField(
+                label: "Note (optional)",
+                icon: Icons.note,
+                controller: controller.requestNoteController,
+                maxLines: 3,
+              ),
+
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: controller.isSubmitting.value
+                      ? null
+                      : controller.submitWithdraw,
+                  child: controller.isSubmitting.value
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Submit Withdrawal"),
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            "New Withdrawal",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-
-          _inputField(
-            label: "Amount (৳)",
-            icon: Icons.refresh,
-          ),
-
-          const SizedBox(height: 12),
-
-          _inputField(
-            label: "Note (optional)",
-            icon: Icons.note_alt_outlined,
-            maxLines: 3,
-          ),
-
-          const SizedBox(height: 20),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey.shade400,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text(
-                "Submit Withdrawal",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ],
+          );
+        }),
       ),
     );
   }
 
-  Widget _balanceCard(String title, String value, Color iconColor) {
+
+  Widget _balanceCard(String title, String value, Color color) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(Icons.account_balance_wallet,
-                    color: iconColor, size: 26),
-                const SizedBox(width: 8),
-                Text(title, style: const TextStyle(fontSize: 14)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              value,
-              style:
-              const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            Text(title),
+            const SizedBox(height: 8),
+            Text(value,
+                style:
+                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -94,23 +94,18 @@ class PaymentRequestPage extends StatelessWidget {
   Widget _inputField({
     required String label,
     required IconData icon,
+    required TextEditingController controller,
     int maxLines = 1,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: TextField(
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          icon: Icon(icon),
-          labelText: label,
-          border: InputBorder.none,
-        ),
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon),
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 }
+

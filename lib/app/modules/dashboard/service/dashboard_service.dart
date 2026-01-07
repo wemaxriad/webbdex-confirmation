@@ -13,6 +13,7 @@ class DashboardService {
 
     if (response != null && response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
+      print(jsonResponse);
       final model = DashboardModel.fromJson(jsonResponse);
       return model.data;
     }

@@ -1,34 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controller/order_details_controller.dart';
-import '../../../model/order_model.dart';
+import '../../../utils/constant_colors.dart';
+import '../controller/order_controller.dart';
+import '../model/orderDetailsModel.dart';
 
 class OrderDetailsView extends StatelessWidget {
-  final int orderId;
 
-  const OrderDetailsView({super.key, required this.orderId});
+  const OrderDetailsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(OrderDetailsController(orderId));
-
+    final controller = Get.put(MyOrdersController());
     return Scaffold(
       backgroundColor: const Color(0xffF5F5F5),
       appBar: AppBar(
-        backgroundColor: const Color(0xffFF3B30),
-        foregroundColor: Colors.white,
-        elevation: 0,
+        backgroundColor: primaryColor,
         title: const Text(
-          "Order Details",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'Order Details',
+          style: TextStyle(color: Colors.white),
         ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
+
       body: Obx(() {
-        if (controller.isLoading.isTrue || controller.order.value == null) {
+        if (controller.isLoading.isTrue || controller.orderDetails.value == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final Order order = controller.order.value!;
+        final Order order = controller.orderDetails.value!;
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -59,7 +58,7 @@ class OrderDetailsView extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "SAR ${order.total}",
+                          " ${order.totalAmount}",
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -93,23 +92,72 @@ class OrderDetailsView extends StatelessWidget {
                 title: "Order Details",
                 child: Column(
                   children: [
-                    _row("Subtotal", "SAR ${order.subtotal}"),
+                    _row("Subtotal", " ${order.subtotal}"),
                     _divider(),
-                    _row("Coupon Discount", "SAR ${order.discount}"),
+                    _row("Tax", " ${order.productTax}"),
                     _divider(),
-                    _row("Tax", "SAR ${order.tax}"),
-                    _divider(),
-                    _row("Shipping Cost", "SAR ${order.shippingCost}"),
+                    _row("Shipping Cost", " ${order.shippingCost}"),
                     _divider(),
                     _row(
                       "Payment method",
-                      order.paymentMethod.replaceAll("_", " "),
+                      order.paymentStatus.toString(),
                     ),
                     _divider(),
-                    _row("Total", "SAR ${order.total}", bold: true),
+                    _row("Total", " ${order.totalAmount}", bold: true),
                   ],
                 ),
               ),
+
+              /// ================= CONFIRMATION INFO =================
+              SizedBox(height: 10,),
+              if(order.confirmationDate !=null)
+              _card(
+                title: "Confirmation Information",
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _row("Preferred Language", order.confirmationPreferredLanguage??''),
+                    _divider(),
+                    _row("Confirmation Date", order.confirmationDate??''),
+                    _divider(),
+
+                    if (order.confirmationCallNote !=null) ...[
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Call Note",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(order.confirmationCallNote??''),
+                    ],
+
+                    if (order.confirmationCallRecord!=null) ...[
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          // TODO: open audio player
+                        },
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text("Play Call Recording"),
+                      ),
+                    ],
+
+                    if (order.confirmationCallImage !=null) ...[
+                      const SizedBox(height: 16),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          order.confirmationCallImage??'',
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
 
               const SizedBox(height: 16),
 
@@ -117,51 +165,58 @@ class OrderDetailsView extends StatelessWidget {
               _card(
                 title: "Products",
                 child: Column(
-                  children: List.generate(order.items.length, (index) {
-                    final item = order.items[index];
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text("Quantity: ${item.qty}"),
-                        const SizedBox(height: 10),
-
-                        /// Refund Button
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                  children: order.orderDetails!.map((item) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffF8F8F8),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          onPressed: () {
-                            // TODO: refund request logic
-                          },
-                          child: const Text(
-                            "Request Refund",
-                            style: TextStyle(color: Colors.white),
+                          const SizedBox(height: 6),
+                          Text("Quantity: ${item.qty}"),
+                          Text("Price:  ${item.price}"),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Subtotal:  ${item.subtotal}",
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
-                        ),
 
-                        if (index != order.items.length - 1)
-                          const Divider(height: 32),
-                      ],
+                          const SizedBox(height: 12),
+
+                          /// Refund Button
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              // TODO refund logic
+                            },
+                            child: const Text(
+                              "Request Refund",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
-                  }),
+                  }).toList(),
                 ),
               ),
+
             ],
           ),
         );

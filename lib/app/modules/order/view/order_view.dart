@@ -97,12 +97,12 @@ class MyOrdersView extends GetView<MyOrdersController> {
               // ✅ Navigate to Order Details
               onTap: () {
                 //Get.to(() => OrderDetailsView(orderId: order.id));
-                Get.to(
-                      () => OrderDetailsView(orderId: order.id),
-                  binding: BindingsBuilder(() {
-                    Get.put(OrderDetailsController(order.id));
-                  }),
-                );
+                // Get.to(
+                //       () => OrderDetailsView(orderId: order.id!),
+                //   binding: BindingsBuilder(() {
+                //     Get.put(OrderDetailsController(order.id));
+                //   }),
+                // );
 
               },
 
@@ -125,7 +125,7 @@ class MyOrdersView extends GetView<MyOrdersController> {
                     CircleAvatar(
                       backgroundColor: primaryColor.withOpacity(0.1),
                       child: Text(
-                        "${order.id}",
+                        "${order!.id}",
                         style: TextStyle(
                           color: primaryColor,
                           fontWeight: FontWeight.bold,
@@ -141,7 +141,7 @@ class MyOrdersView extends GetView<MyOrdersController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Order #${order.id}",
+                            "Order #${order!.id}",
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -149,9 +149,9 @@ class MyOrdersView extends GetView<MyOrdersController> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            order.status,
+                            order!.status.toString(),
                             style: TextStyle(
-                              color: _statusColor(order.status),
+                              color: _statusColor(order!.status.toString()),
                             ),
                           ),
                         ],

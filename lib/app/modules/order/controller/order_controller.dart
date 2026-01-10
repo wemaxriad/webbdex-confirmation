@@ -1,24 +1,39 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
-import '../../../model/order_model.dart';
 import '../../../services/user-service.dart';
+import '../../../utils/constant_colors.dart';
+import '../model/orderDetailsModel.dart';
 import '../model/orderModel.dart';
 import '../service/order_service.dart';
+import '../view/order_details_view.dart';
 
 class MyOrdersController extends GetxController {
-  var allOrders = <Order>[].obs;
   // --- Change Status Dialog State ---
   var selectedStatus = 'Select Status'.obs;
+  var assignSelectedStatus = 'Assign Order'.obs;
   var statusNotes = ''.obs;
-  var attachmentName = Rxn<String>(); // To hold the name of the attached file.
+  /// Attachment
+  File? selectedAudioFile;
+  File? selectedImageFile;
+  var attachmentName = RxnString();
+  var attachmentAudioName = RxnString();
   var statusOptions = ['Select Status', 'Confirmed', 'Canceled'];
+  var assignStatusOptions = ['Assign Order'];
 
   final OrderService _service = OrderService();
   final UserService _userService = UserService();
 
+  final pendingSearchCtrl = TextEditingController();
+  final confirmedSearchCtrl = TextEditingController();
+  final assignSearchCtrl = TextEditingController();
+
   Rx<OrderData?> orderData = Rx<OrderData?>(null);
+  RxList<Order?> allOrders = <Order>[].obs;
+  Rx<Order?> orderDetails = Rx<Order?>(null);
   RxList<OrderList> orderList = <OrderList>[].obs;
   RxList<OrderList> assignOrderList = <OrderList>[].obs;
   RxList<OrderList> confirmedOrderList = <OrderList>[].obs;
@@ -57,7 +72,7 @@ class MyOrdersController extends GetxController {
       isLoading(reset);
       isMoreLoading(!reset);
 
-      final data = await _service.getOrderHistoryData(page: currentPage);
+      final data = await _service.getOrderHistoryData(page: currentPage,search: pendingSearchCtrl.text,);
       if (data != null) {
         lastPage =  data.lastPage??1;
         orderList.addAll(data.orderList ?? []);
@@ -68,6 +83,7 @@ class MyOrdersController extends GetxController {
       isMoreLoading(false);
     }
   }
+
 
   Future<void> getAssignOrderHistoryData({bool reset = false}) async {
     try {
@@ -80,7 +96,7 @@ class MyOrdersController extends GetxController {
       isLoading(reset);
       assignOrderIsMoreLoading(!reset);
 
-      final data = await _service.getAssignOrderHistoryData(page: assignOrderCurrentPage);
+      final data = await _service.getAssignOrderHistoryData(page: assignOrderCurrentPage,search: assignSearchCtrl.text,);
       if (data != null) {
         assignOrderLastPage =  data.lastPage??1;
         assignOrderList.addAll(data.orderList ?? []);
@@ -96,17 +112,17 @@ class MyOrdersController extends GetxController {
     try {
       if (reset) {
         confirmedOrderCurrentPage = 1;
-        assignOrderList.clear();
+        confirmedOrderList.clear();
       }
       if (confirmedOrderCurrentPage > confirmedOrderLastPage) return;
 
       isLoading(reset);
       confirmedOrderIsMoreLoading(!reset);
 
-      final data = await _service.getConfirmedOrderHistoryData(page: confirmedOrderCurrentPage);
+      final data = await _service.getConfirmedOrderHistoryData(page: confirmedOrderCurrentPage,search: confirmedSearchCtrl.text,);
       if (data != null) {
         confirmedOrderLastPage =  data.lastPage??1;
-        assignOrderList.addAll(data.orderList ?? []);
+        confirmedOrderList.addAll(data.orderList ?? []);
         confirmedOrderCurrentPage++;
       }
     } finally {
@@ -115,8 +131,32 @@ class MyOrdersController extends GetxController {
     }
   }
 
+
+  Future<void> getConfirmedOrderDetailsData(orderId,tenantId) async {
+    try {
+      Get.to(
+            () => OrderDetailsView(),
+        transition: Transition.downToUp,
+      );
+      isLoading(true);
+      final data = await _service.getConfirmedOrderDetailsData(tenantId,orderId);
+      if (data != null) {
+        orderDetails.value = data;
+      }
+    }catch(e) {
+      Get.back();
+    } finally {
+      isLoading(false);
+    }
+  }
+
   Future<void> refreshOrders() async {
+    pendingSearchCtrl.clear();
+    assignSearchCtrl.clear();
+    confirmedSearchCtrl.clear();
     await getOrderHistoryData(reset: true);
+    await getAssignOrderHistoryData(reset: true);
+    await getConfirmedOrderHistoryData(reset: true);
   }
 
 
@@ -131,57 +171,122 @@ class MyOrdersController extends GetxController {
     statusNotes.value = notes;
   }
 
+  void showImageSourceSheet() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Select Image Source',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 16),
+
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: primaryColor),
+              title: const Text('Camera'),
+              onTap: () {
+                Get.back();
+                pickImageAttachment(ImageSource.camera);
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: primaryColor),
+              title: const Text('Gallery'),
+              onTap: () {
+                Get.back();
+                pickImageAttachment(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
   // --- Attachment Logic ---
-  void pickImageAttachment() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> pickImageAttachment(ImageSource source) async {
+    final picker = ImagePicker();
+
+    final XFile? image = await picker.pickImage(
+      source: source,
+      imageQuality: 70,
+    );
 
     if (image != null) {
+      selectedImageFile = File(image.path);
       attachmentName.value = image.name;
-      Get.snackbar('Success', 'Image attached: ${image.name}');
-    } else {
-      Get.snackbar('Info', 'No image selected.');
     }
   }
 
-  void pickAudioAttachment() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.audio);
+  Future<void> pickAudioAttachment() async {
+    final picker = FilePicker.platform;
 
-    if (result != null) {
-      attachmentName.value = result.files.single.name;
-      Get.snackbar('Success', 'Audio attached: ${attachmentName.value}');
-    } else {
-      Get.snackbar('Info', 'No audio file selected.');
+    final result = await picker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3', 'wav', 'm4a'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      selectedAudioFile = File(result.files.single.path!);
+      attachmentAudioName.value = result.files.single.name;
     }
   }
 
   void clearAttachment() {
+    selectedImageFile = null;
     attachmentName.value = null;
   }
+  void clearAudioAttachment() {
+    selectedAudioFile = null;
+    attachmentAudioName.value = null;
+  }
 
-  void submitStatusChange(int orderId) {
-    if (selectedStatus.value == 'Select Status') {
-      Get.snackbar('Error', 'Please select a new status.', snackPosition: SnackPosition.BOTTOM);
-      return;
+  Future<void> submitStatusChange(String orderId,tenantId,status) async {
+    if(status != 'Assign Order') {
+      if (selectedStatus.value == 'Select Status') return;
+      status =  status == 'Confirmed' ? 'approved' : 'cancel';
     }
 
-    // debugPrint(
-    //     'Submitting status change for Order $orderId: ${selectedStatus.value} with notes: ${statusNotes.value} and attachment: ${attachmentName.value}');
+    if(status == 'Assign Order') {
+      status = 'assign';
+    }
 
-    final orderIndex = allOrders.indexWhere((order) => order.id == orderId);
 
-    if (orderIndex != -1) {
-      final updatedOrder = allOrders[orderIndex].copyWith(status: selectedStatus.value);
-      allOrders[orderIndex] = updatedOrder;
 
-      // Reset state
-      selectedStatus.value = 'Select Status';
-      statusNotes.value = '';
+    isLoading(true);
+    final token = await _userService.getToken();
+    final success = await _service.changeOrderStatus(
+      token: token,
+      orderId: orderId,
+      tenantId: tenantId,
+      status: status,
+      note: statusNotes.value,
+      audioFile: selectedAudioFile,
+      imageFile: selectedImageFile,
+    );
+
+    isLoading(false);
+
+    if (success) {
+      Get.back(); // close dialog
+        Get.rawSnackbar(
+          message: "Order status updated",
+          backgroundColor: Colors.green,
+          snackPosition: SnackPosition.TOP,
+        );
       clearAttachment();
-      Get.back();
-      Get.snackbar('Success', 'Order $orderId status updated.', snackPosition: SnackPosition.BOTTOM);
-    } else {
-      Get.snackbar('Error', 'Order not found.', snackPosition: SnackPosition.BOTTOM);
+      clearAudioAttachment();
+      refreshOrders(); // refresh list
     }
   }
+
 }

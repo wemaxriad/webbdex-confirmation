@@ -7,7 +7,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../model/order_model.dart';
 import '../../order/controller/order_details_controller.dart';
 import '../../order/view/order_details_view.dart';
+import '../controller/order_call_controller.dart';
 import '../model/orderModel.dart';
+import 'order_call_screen_page.dart';
 
 class OrderListView extends GetView<MyOrdersController> {
   const OrderListView({super.key});
@@ -461,7 +463,15 @@ class OrderListView extends GetView<MyOrdersController> {
                         SizedBox(
                           height: 32,
                           child: ElevatedButton.icon(
-                            onPressed: () => openDialPad("${order.customerPhone}"),
+                            onPressed: () {
+                              final callCtrl = Get.put(CallController());
+                              Get.to(() => const OrderCallScreenPage());
+                              callCtrl.makeCall(
+                                  order.customerPhone ?? '',
+                                  123 // Replace with dynamic auth user ID
+                              );
+                            },
+                            // onPressed: () => openDialPad("${order.customerPhone}"),
                             icon: const Icon(Icons.call, size: 16,color: Colors.white),
                             label: const Text(
                               'Call',

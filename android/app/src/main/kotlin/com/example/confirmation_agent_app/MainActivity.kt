@@ -1,4 +1,4 @@
-package com.example.confirmation_agent_app
+package com.confirmationagent.app
 
 import io.flutter.embedding.android.FlutterActivity
 

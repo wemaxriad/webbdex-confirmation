@@ -50,5 +50,15 @@
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Gallery access required to upload documents</string>
 
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app requires microphone access to place and receive voice calls.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+        <string>voip</string>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+
 </dict>
 </plist>

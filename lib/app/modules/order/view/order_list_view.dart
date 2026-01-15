@@ -466,9 +466,8 @@ class OrderListView extends GetView<MyOrdersController> {
                             onPressed: () {
                               final callCtrl = Get.put(CallController());
                               Get.to(() => const OrderCallScreenPage());
-                              callCtrl.makeCall(
+                              callCtrl.makeCall(order,
                                   order.customerPhone ?? '',
-                                  123 // Replace with dynamic auth user ID
                               );
                             },
                             // onPressed: () => openDialPad("${order.customerPhone}"),

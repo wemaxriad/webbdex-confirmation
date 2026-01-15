@@ -34,8 +34,8 @@ class UserService {
 
   getUserId() async {
     prefs = await SharedPreferences.getInstance();
-    if (prefs!.getString('user-id') != null) {
-      return prefs!.getString('user-id').toString();
+    if (prefs!.getString('userID') != null) {
+      return prefs!.getString('userID').toString();
     } else {
       return null;
     }

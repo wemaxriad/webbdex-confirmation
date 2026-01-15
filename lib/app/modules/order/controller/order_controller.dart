@@ -43,6 +43,7 @@ class MyOrdersController extends GetxController {
   int currentPage = 1;
   int lastPage = 1;
   RxBool isMoreLoading = false.obs;
+  RxString currentCallSid = ''.obs;
 
   int assignOrderCurrentPage = 1;
   int assignOrderLastPage = 1;
@@ -270,6 +271,7 @@ class MyOrdersController extends GetxController {
       tenantId: tenantId,
       status: status,
       note: statusNotes.value,
+      callSid: currentCallSid.value,
       audioFile: selectedAudioFile,
       imageFile: selectedImageFile,
     );
@@ -287,6 +289,208 @@ class MyOrdersController extends GetxController {
       clearAudioAttachment();
       refreshOrders(); // refresh list
     }
+  }
+
+
+  void showChangeStatusConfirmDialog(OrderList order) {
+    selectedStatus.value = 'Select Status';
+    statusNotes.value = '';
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Change Status",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.close,
+                        color: primaryColor,
+                        size: 30,
+                      ),
+                      onPressed: () => Get.back(),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                const SizedBox(height: 10),
+                const Text(
+                  "Select Status*",
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+                const SizedBox(height: 5),
+                Obx(
+                      () => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value:
+                        statusOptions.contains(
+                          selectedStatus.value,
+                        )
+                            ? selectedStatus.value
+                            : statusOptions.first,
+                        isExpanded: true,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
+                        onChanged: (String? newValue) {
+                          updateSelectedStatus(newValue);
+                        },
+                        items:  statusOptions
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: TextStyle(
+                                color: value == 'Select Status'
+                                    ? Colors.grey
+                                    : Colors.black,
+                              ),
+                            ),
+                          );
+                        })
+                            .toList(),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                const Text(
+                  "Note",
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+                const SizedBox(height: 5),
+                TextField(
+                  maxLines: 4,
+                  onChanged: updateStatusNotes,
+                  decoration: InputDecoration(
+                    hintText: 'Add notes here...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                        color: primaryColor,
+                        width: 1.5,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.all(12),
+                  ),
+                ),
+                const SizedBox(height: 15),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 45,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back();
+                            }
+
+                            // 2️⃣ Close call screen
+                            if (Get.previousRoute.isNotEmpty) {
+                              Get.back();
+                            }
+                          } ,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Obx(
+                            () => SizedBox(
+                          height: 45,
+                          child: ElevatedButton(
+                            onPressed: selectedStatus.value == 'Select Status'
+                                ? null
+                                : () async {
+                              await submitStatusChange(
+                                order.id.toString(),
+                                order.tenantId.toString(),
+                                selectedStatus.value,
+                              );
+
+                              // 1️⃣ Close popup
+                              if (Get.isDialogOpen ?? false) {
+                                Get.back();
+                              }
+
+                              // 2️⃣ Close call screen
+                              if (Get.previousRoute.isNotEmpty) {
+                                Get.back();
+                              }
+                            },
+
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Yes, Sure',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
 }

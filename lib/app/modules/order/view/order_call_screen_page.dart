@@ -105,7 +105,7 @@ class OrderCallScreenPage extends StatelessWidget {
                         icon: const Icon(Icons.call_end, color: Colors.white, size: 30),
                         onPressed: () {
                           controller.endCall();
-                          Get.back(); // Using Get back instead of Navigator
+                          // Get.back(); // Using Get back instead of Navigator
                         },
                       ),
                     ),

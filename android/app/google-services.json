@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "987354593384",
+    "project_id": "webbydex-795ea",
+    "storage_bucket": "webbydex-795ea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987354593384:android:eb2bb72bb3f27153e4e3dd",
+        "android_client_info": {
+          "package_name": "com.confirmationagent.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDte8OR4E16_T6cNOiJoONZ1alGGb68ndc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,6 @@
 class ApiList {
-  static String? mainUrl = "http://192.168.0.111/webbydex/";
+  // static String? mainUrl = "http://192.168.0.107/webbydex/";
+  static String? mainUrl = "https://webbydex.com/";
   static String? apiUrl = "webbydex.com";
   static String? mapGoogleApiKey = "";
   static String? autoUpdate = "on";
@@ -26,7 +27,7 @@ class ApiList {
   static String? confirmationDocumentsStore = "${server!}/confirmation-agent/documents/store";
   static String? logout = "${server!}sign-out";
   static String? refreshToken = "${server!}refresh";
-  static String? orderCallToken = "${server!}refresh";
+  static String? orderCallToken = "${server!}/confirmation-agent/order-call/token";
   static String? deleteAccount = '${server!}account/delete';
 
 }

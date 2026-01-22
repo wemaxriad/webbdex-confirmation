@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 
 import '../../../utils/const_strings.dart';
 import '../../../utils/custom_input.dart';
+import '../../../globalController/global_controller.dart';
 
 class EditProfileView extends StatelessWidget {
   const EditProfileView({Key? key}) : super(key: key);
@@ -19,7 +20,7 @@ class EditProfileView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: const Text('Edit Profile'),
+        title: Text(Get.find<GlobalController>().t('Edit Profile')),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
@@ -71,17 +72,17 @@ class EditProfileView extends StatelessWidget {
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 15),
-            labelCommon('Phone'),
+            labelCommon(Get.find<GlobalController>().t('Phone')),
             CustomInput(
               controller: controller.phoneController,
-              hintText: 'Enter phone number',
+              hintText: Get.find<GlobalController>().t('Enter phone number'),
               isNumberField: true,
               paddingHorizontal: 17,
               textInputAction: TextInputAction.done,
             ),
             const SizedBox(height: 30),
             buttonPrimary(
-              'Update Profile',
+              Get.find<GlobalController>().t('Update Profile'),
               () {
                 controller.updateProfile();
               },

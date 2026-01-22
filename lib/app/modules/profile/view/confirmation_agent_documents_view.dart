@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
 import '../../../utils/constant_colors.dart';
+import '../../../globalController/global_controller.dart';
 import '../controller/profile_controller.dart';
 import '../model/profileModel.dart';
 import 'confirmation_agent_documents_upload.dart';
@@ -21,9 +22,9 @@ class ConfirmationAgentDocumentsView extends GetView<ProfileController> {
         iconTheme: const IconThemeData(
           color: Colors.white, // Back button color
         ),
-        title: const Text(
-          'Verification Documents',
-          style: TextStyle(
+        title: Text(
+          Get.find<GlobalController>().t('Verification Documents'),
+          style: const TextStyle(
             color: Colors.white, // Title color
             fontWeight: FontWeight.w600,
           ),
@@ -32,9 +33,9 @@ class ConfirmationAgentDocumentsView extends GetView<ProfileController> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: primaryColor,
         icon: const Icon(Icons.upload_file, color: Colors.white),
-        label: const Text(
-          'Upload',
-          style: TextStyle(color: Colors.white),
+        label: Text(
+          Get.find<GlobalController>().t('Upload'),
+          style: const TextStyle(color: Colors.white),
         ),
         onPressed: ()  {
            Get.to(
@@ -52,7 +53,7 @@ class ConfirmationAgentDocumentsView extends GetView<ProfileController> {
         final detail = controller.userDetails.value?.confirmationAgentDetail;
 
         if (detail == null) {
-          return const Center(child: Text('No data found'));
+          return Center(child: Text(Get.find<GlobalController>().t('No data found')));
         }
 
         return SingleChildScrollView(
@@ -68,7 +69,7 @@ class ConfirmationAgentDocumentsView extends GetView<ProfileController> {
 
               /// ---------------- Documents Section ----------------
               Text(
-                'Uploaded Documents',
+                Get.find<GlobalController>().t('Uploaded Documents'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
 
@@ -103,9 +104,9 @@ class ConfirmationAgentDocumentsView extends GetView<ProfileController> {
       decoration: _boxDecoration(),
       child: Column(
         children: [
-          _infoRow('NID Number', detail.nidNumber),
-          _infoRow('Passport Number', detail.passportNumber),
-          _infoRow('Status', _statusText(detail.status??1)),
+          _infoRow(Get.find<GlobalController>().t('NID Number'), detail.nidNumber),
+          _infoRow(Get.find<GlobalController>().t('Passport Number'), detail.passportNumber),
+          _infoRow(Get.find<GlobalController>().t('Status'), _statusText(detail.status??1)),
         ],
       ),
     );
@@ -126,7 +127,7 @@ class ConfirmationAgentDocumentsView extends GetView<ProfileController> {
           Expanded(
             flex: 5,
             child: Text(
-              value ?? 'N/A',
+              value ?? Get.find<GlobalController>().t('N/A'),
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
@@ -138,15 +139,15 @@ class ConfirmationAgentDocumentsView extends GetView<ProfileController> {
   String _statusText(int status) {
     switch (status) {
       case 1:
-        return 'Pending';
+        return Get.find<GlobalController>().t('Pending');
       case 2:
-        return 'Under Review';
+        return Get.find<GlobalController>().t('Under Review');
         case 3:
-        return 'Approved';
+        return Get.find<GlobalController>().t('Approved');
       case 4:
-        return 'Rejected';
+        return Get.find<GlobalController>().t('Rejected');
       default:
-        return 'Unknown';
+        return Get.find<GlobalController>().t('Unknown');
     }
   }
 
@@ -174,7 +175,7 @@ class ConfirmationAgentDocumentsView extends GetView<ProfileController> {
             Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
-                doc.documentTypeName??'',
+                Get.find<GlobalController>().t(doc.documentTypeName??''),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),

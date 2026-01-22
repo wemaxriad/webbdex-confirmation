@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../utils/constant_colors.dart';
+import '../../../globalController/global_controller.dart';
 import '../controller/profile_controller.dart';
 import '../model/documentTypesModel.dart';
 
@@ -16,9 +17,9 @@ class ConfirmationAgentDocumentsUpload extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: const Text(
-          'Documents Update',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          Get.find<GlobalController>().t('Documents Update'),
+          style: const TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -29,14 +30,14 @@ class ConfirmationAgentDocumentsUpload extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// PERSONAL INFO (Static)
-          _sectionTitle('Personal Info'),
-          _textFieldController('NID Number', controller.userDetails.value?.confirmationAgentDetail?.nidNumber??'',controller.nidController),
-          _textFieldController('Passport Number', controller.userDetails.value?.confirmationAgentDetail?.passportNumber??'',controller.passportController),
+          _sectionTitle(Get.find<GlobalController>().t('Personal Info')),
+          _textFieldController(Get.find<GlobalController>().t('NID Number'), controller.userDetails.value?.confirmationAgentDetail?.nidNumber??'',controller.nidController),
+          _textFieldController(Get.find<GlobalController>().t('Passport Number'), controller.userDetails.value?.confirmationAgentDetail?.passportNumber??'',controller.passportController),
 
           const SizedBox(height: 20),
 
           /// DOCUMENTS
-          _sectionTitle('Documents'),
+          _sectionTitle(Get.find<GlobalController>().t('Documents')),
 
           ...controller.documentTypes.map(
                 (doc) => _documentPicker(
@@ -62,7 +63,7 @@ class ConfirmationAgentDocumentsUpload extends StatelessWidget {
               },
               child: controller.isSubmitting.value
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Update Documents'),
+                  : Text(Get.find<GlobalController>().t('Update Documents')),
             ),
           )),
         ],
@@ -83,7 +84,7 @@ class ConfirmationAgentDocumentsUpload extends StatelessWidget {
       children: [
         Text.rich(
           TextSpan(
-            text: doc.name ?? '',
+            text: Get.find<GlobalController>().t(doc.name ?? ''),
             children: [
               if (doc.isRequired == true)
                 const TextSpan(
@@ -118,7 +119,7 @@ class ConfirmationAgentDocumentsUpload extends StatelessWidget {
                     return Text(
                       file != null
                           ? file.path.split('/').last
-                          : 'Choose File',
+                          : Get.find<GlobalController>().t('Choose File'),
                       overflow: TextOverflow.ellipsis,
                     );
                   }),
@@ -150,7 +151,7 @@ class ConfirmationAgentDocumentsUpload extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(Get.find<GlobalController>().t('Camera')),
               onTap: () {
                 Get.back();
                 controller.pickFile(slug, ImageSource.camera);
@@ -158,7 +159,7 @@ class ConfirmationAgentDocumentsUpload extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(Get.find<GlobalController>().t('Gallery')),
               onTap: () {
                 Get.back();
                 controller.pickFile(slug, ImageSource.gallery);

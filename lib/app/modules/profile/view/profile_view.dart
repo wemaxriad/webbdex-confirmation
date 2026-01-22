@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../helper/helper.dart';
 import '../../../utils/constant_colors.dart';
+import '../../../globalController/global_controller.dart';
 import '../controller/profile_controller.dart';
 import 'confirmation_agent_documents_view.dart';
 import 'shimmer/profile_shimmer_view.dart';
@@ -104,7 +105,7 @@ class ProfileView extends StatelessWidget {
 
             // --- Menu List (Functional Section) ---
             _buildMenuItem(
-              title: "My Documents",
+              title: Get.find<GlobalController>().t("My Documents"),
               icon: Icons.receipt_long,
               onTap: () {
                 Get.to(
@@ -117,21 +118,21 @@ class ProfileView extends StatelessWidget {
             ),
             // --- Menu List (Functional Section) ---
             _buildMenuItem(
-              title: "My orders",
+              title: Get.find<GlobalController>().t("My orders"),
               icon: Icons.receipt_long,
               onTap: () {
                 Get.toNamed(AppRoutes.ORDER);
               },
             ),
             _buildMenuItem(
-              title: "Terms & Condition",
+              title: Get.find<GlobalController>().t("Terms & Condition"),
               icon: Icons.article_outlined,
               onTap: () {
                 Get.toNamed(AppRoutes.TERMS_AND_CONDITIONS);
               },
             ),
             _buildMenuItem(
-              title: "Privacy policy",
+              title: Get.find<GlobalController>().t("Privacy policy"),
               icon: Icons.lock_outline,
               // Not the final item now, as Logout is next
               onTap: () {
@@ -145,14 +146,14 @@ class ProfileView extends StatelessWidget {
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.logout, color: primaryColor),
-                title: const Text("Logout"),
+                title: Text(Get.find<GlobalController>().t("Logout")),
                 onTap: () {
                   // --- Logout Confirmation Dialog ---
                   Get.defaultDialog(
-                    title: "Logout",
-                    middleText: "Are you sure you want to log out?",
-                    textConfirm: "Yes",
-                    textCancel: "No",
+                    title: Get.find<GlobalController>().t("Logout"),
+                    middleText: Get.find<GlobalController>().t("Are you sure you want to log out?"),
+                    textConfirm: Get.find<GlobalController>().t("Yes"),
+                    textCancel: Get.find<GlobalController>().t("No"),
                     onConfirm: () {
                       controller.logout();
                     },
@@ -196,7 +197,7 @@ class ProfileView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                controller.userDetails.value?.name??'',
+                Get.find<GlobalController>().t(controller.userDetails.value?.name??''),
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -204,7 +205,7 @@ class ProfileView extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                "Member since ${formatMonthYear(controller.userDetails.value?.createdAt??'')}",
+                "${Get.find<GlobalController>().t("Member since")} ${formatMonthYear(controller.userDetails.value?.createdAt??'')}",
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
             ],
@@ -234,7 +235,7 @@ class ProfileView extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.grey[500], size: 20),
         const SizedBox(width: 15),
-        Text(value, style: const TextStyle(fontSize: 14)),
+        Text(Get.find<GlobalController>().t(value), style: const TextStyle(fontSize: 14)),
       ],
     );
   }

@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // Import this
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'app/globalController/global_controller.dart';
 import 'app/modules/auth/controllers/auth_controller.dart';
 import 'app/routes/app_pages.dart';
 
@@ -10,6 +12,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   Get.put(AuthController(), permanent: true);
+  Get.put(GlobalController(), permanent: true);
+
+ var  prefs = await SharedPreferences.getInstance();
+ var lanKey = prefs.getString('langKey');
+  if (lanKey != null) {
+     Get.updateLocale(Locale(lanKey));
+  } else {
+    Get.updateLocale(Locale('en'));
+  }
+  Get.find<GlobalController>().selectedLang.value = prefs.getString('langKey') ?? 'en';
   runApp(const MyApp());
 }
 
@@ -19,24 +31,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      // Localization Settings
-      translations: AppTranslation(),
-      locale: const Locale('en'),
-      fallbackLocale: const Locale('en'),
-
-      // These delegates provide the actual translations for Material widgets
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-
-      // List all supported locales
-      supportedLocales: const [
-        Locale('en'),
-        Locale('ar'),
-      ],
-
       debugShowCheckedModeBanner: false,
       title: 'Confirmation Agent',
 

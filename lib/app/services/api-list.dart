@@ -12,6 +12,8 @@ class ApiList {
   static String? login = "${server!}/confirmation-agent/login";
   static String? registerUser = "${server!}/confirmation-agent/register";
   static String? countryList = "${server!}/confirmation-agent/country";
+  static String? languagesList = "${server!}/confirmation-agent/languages";
+  static String? languagesFileList = "${server!}/confirmation-agent/languages/file";
   static String? profile = "${server!}/confirmation-agent/profile";
   static String? wallet = "${server!}/confirmation-agent/wallet/history";
   static String? orderList = "${server!}/confirmation-agent/order";

@@ -92,6 +92,10 @@ class OrderDetailsView extends StatelessWidget {
                 title: "Order Details",
                 child: Column(
                   children: [
+                    _row("Preferred Language", order.confirmationPreferredLanguage??''),
+                    _divider(),
+                    _row("Customer", " ${order.subtotal}"),
+                    _divider(),
                     _row("Subtotal", " ${order.subtotal}"),
                     _divider(),
                     _row("Tax", " ${order.productTax}"),

@@ -231,6 +231,8 @@ class AuthController extends GetxController {
     }
   }
 
+
+
   userLogout() async {
     await userService.removeSharedPreferenceData();
     isUser.value = false;

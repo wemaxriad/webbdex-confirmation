@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../globalController/global_controller.dart';
 import '../controller/payment_tabs_controller.dart';
 import 'payment_request_page.dart';
 import 'payment_history_page.dart';
@@ -21,12 +22,12 @@ class PaymentMainView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _tabItem(
-                  title: "Payment Request",
+                  title: Get.find<GlobalController>().t("Payment Request"),
                   isActive: controller.currentTab.value == 0,
                   onTap: () => controller.changeTab(0),
                 ),
                 _tabItem(
-                  title: "Payment History",
+                  title: Get.find<GlobalController>().t("Payment History"),
                   isActive: controller.currentTab.value == 1,
                   onTap: () => controller.changeTab(1),
                 ),

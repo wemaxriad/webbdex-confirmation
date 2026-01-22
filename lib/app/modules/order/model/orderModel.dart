@@ -61,6 +61,7 @@ class OrderList {
   String? totalAmount;
   String? confirmationStatus;
   String? confirmationStatusName;
+  String? confirmationPreferredLanguage;
   String? status;
   String? statusName;
   String? paymentStatus;
@@ -76,6 +77,7 @@ class OrderList {
         this.totalAmount,
         this.confirmationStatus,
         this.confirmationStatusName,
+        this.confirmationPreferredLanguage,
         this.status,
         this.statusName,
         this.paymentStatus,
@@ -91,6 +93,7 @@ class OrderList {
     totalAmount = json['total_amount'];
     confirmationStatus = json['confirmation_status'];
     confirmationStatusName = json['confirmation_status_name'];
+    confirmationPreferredLanguage = json['confirmation_preferred_language'];
     status = json['status'];
     statusName = json['status_name'];
     paymentStatus = json['payment_status'];
@@ -98,7 +101,7 @@ class OrderList {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = this.id;
     data['tenant_id'] = this.tenantId;
     data['global_id'] = this.globalId;
@@ -108,6 +111,8 @@ class OrderList {
     data['total_amount'] = this.totalAmount;
     data['confirmation_status'] = this.confirmationStatus;
     data['confirmation_status_name'] = this.confirmationStatusName;
+    data['confirmation_preferred_language'] =
+        this.confirmationPreferredLanguage;
     data['status'] = this.status;
     data['status_name'] = this.statusName;
     data['payment_status'] = this.paymentStatus;

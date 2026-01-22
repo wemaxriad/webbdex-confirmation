@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../globalController/global_controller.dart';
 import '../controller/payment_tabs_controller.dart';
 import '../model/withdrawRequestModel.dart';
 
@@ -20,9 +21,9 @@ class PaymentHistoryPage extends GetView<PaymentTabsController> {
         if (controller.withdrawRequests.isEmpty) {
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: const [
+            children:  [
               SizedBox(height: 300),
-              Center(child: Text("No withdrawal history")),
+              Center(child: Text(Get.find<GlobalController>().t("No withdrawal history"))),
             ],
           );
         }
@@ -69,17 +70,16 @@ class PaymentHistoryPage extends GetView<PaymentTabsController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("TXN: ${item.transactionId??'-'}",
+          Text("${Get.find<GlobalController>().t("TXN")}: ${Get.find<GlobalController>().t(item.transactionId??'-')}",
               style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
-          Text("Amount: ${item.amount}",
-              style:
-              const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text("${Get.find<GlobalController>().t("Amount")}: ${Get.find<GlobalController>().t(item.amount.toString())}",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
-          Text("Status: ${item.statusName}"),
+          Text("${Get.find<GlobalController>().t("Status")}: ${Get.find<GlobalController>().t(item.statusName.toString())}"),
           const SizedBox(height: 6),
-          Text("Requested: ${item.createdAt}"),
-          Text("Paid: ${item.paidAt ?? '-'}"),
+          Text("${Get.find<GlobalController>().t("Requested")}: ${Get.find<GlobalController>().t(item.createdAt.toString())}"),
+          Text("${Get.find<GlobalController>().t("Paid")}: ${item.paidAt ?? '-'}"),
         ],
       ),
     );

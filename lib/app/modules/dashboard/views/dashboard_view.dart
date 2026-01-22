@@ -2,9 +2,11 @@ import 'package:confirmation_agent_app/app/modules/payment/view/payment_main_vie
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 // Local imports
 import '../../../globalController/global_controller.dart';
+import '../../auth/controllers/auth_controller.dart';
 import '../../profile/controller/profile_controller.dart';
 import '../controller/dashboard_controller.dart';
 import '../../balance/view/balance_view.dart';
@@ -69,40 +71,40 @@ class DashboardView extends GetView<DashboardController> {
           title: Obx(() {
             switch (controller.currentIndex.value) {
               case 0:
-                return const Text(
-                  "Dashboard",
+                return  Text(
+                  Get.find<GlobalController>().t("Dashboard"),
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 20),
                 );
               case 1:
-                return const Text(
-                  "My Order",
+                return  Text(
+                  Get.find<GlobalController>().t("My Order"),
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 20),
                 );
               case 2:
-                return const Text(
-                  "Payment",
+                return  Text(
+                  Get.find<GlobalController>().t("Payment"),
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 20),
                 );
               case 3:
-                return const Text(
-                  "Profile",
+                return  Text(
+                  Get.find<GlobalController>().t("Profile"),
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 20),
                 );
               default:
-                return const Text(
-                  "Dashboard",
+                return  Text(
+            Get.find<GlobalController>().t("Dashboard"),
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -119,47 +121,47 @@ class DashboardView extends GetView<DashboardController> {
           padding: const EdgeInsets.only(right: 15.0),
           child: Row(
             children: [
-              CircleAvatar(
+              Obx(() => CircleAvatar(
                 radius: 16,
                 backgroundColor: Colors.white,
                 child: PopupMenuButton<String>(
                   padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.language, color: kMainColor, size: 22),
-                  onSelected: (newValue) {
-                    Get.updateLocale(Locale(newValue));
-                    Get.snackbar(
-                      "Language",
-                      newValue == 'ar' ? "تم تغيير اللغة" : "Language switched",
-                      snackPosition: SnackPosition.TOP,
-                    );
+
+                  icon: Text(
+                    globalController.getLangIcon(globalController.selectedLang.value),
+                    style: const TextStyle(fontSize: 18),
+                  ),
+
+                  onSelected: (slug) async {
+                    var prefs = await SharedPreferences.getInstance();
+                    prefs.setString('langKey', slug);
+                    globalController.selectedLang.value = slug;
+                    Get.updateLocale(Locale(slug));
                   },
+
                   itemBuilder: (BuildContext bc) {
-                    return [
-                      const PopupMenuItem<String>(
-                        value: 'en',
-                        child: Text("English"),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'ar',
-                        child: Text("عربي"),
-                      ),
-                    ];
+                    return globalController.languagesList.map((lang) {
+                      return PopupMenuItem<String>(
+                        value: lang.slug,
+                        child: Row(
+                          children: [
+                            Text(globalController.getLangIcon(lang.slug.toString())),
+                            const SizedBox(width: 8),
+                            Text(lang.name.toString()),
+                          ],
+                        ),
+                      );
+                    }).toList();
                   },
                 ),
-              ),
+              )),
               const SizedBox(width: 8),
               CircleAvatar(
                 radius: 16,
                 backgroundColor: Colors.white,
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: () {
-                    Get.snackbar(
-                      "Navigation",
-                      "Navigating to Notification List",
-                      snackPosition: SnackPosition.TOP,
-                    );
-                  },
+                  onPressed: () {},
                   icon: const Icon(Icons.notifications, color: kMainColor, size: 22),
                 ),
               ),
@@ -230,10 +232,11 @@ class DashboardView extends GetView<DashboardController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('welcome'.tr,
+
+                      Text(Get.find<GlobalController>().t('Welcome'),
                           style: const TextStyle(
                               fontSize: 17, color: Colors.white)),
-                       Text("${controller.userDetails.value!.name}",
+                       Text(Get.find<GlobalController>().t(controller.userDetails.value!.name.toString()),
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -254,11 +257,11 @@ class DashboardView extends GetView<DashboardController> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
-                            children: const [
+                            children:  [
                               Icon(Icons.account_balance_wallet,
                                   color: Colors.white),
                               SizedBox(width: 10),
-                              Text("Check Balance",
+                              Text(Get.find<GlobalController>().t("Check Balance"),
                                   style: TextStyle(fontWeight: FontWeight.bold)),
                               Spacer(),
                               Icon(Icons.arrow_forward_ios,
@@ -286,18 +289,18 @@ class DashboardView extends GetView<DashboardController> {
                       crossAxisSpacing: 8,
                       childAspectRatio: 3 / 2,
                       children: [
-                        statCard("Assign Orders",
-                            controller.totalAssignedOrder.value, Colors.blue),
-                        statCard("Confirmed Orders",
-                            controller.totalApprovedOrder.value, Colors.green),
-                        statCard("Canceled Orders",
-                            controller.totalCancelOrder.value, Colors.red),
-                        statCard("Pending Orders",
-                            controller.totalPending.value, Colors.orange),
+                        statCard(Get.find<GlobalController>().t("Assign Orders"),
+                          Get.find<GlobalController>().t(controller.totalAssignedOrder.value.toString()), Colors.blue),
+                        statCard(Get.find<GlobalController>().t("Confirmed Orders"),
+                          Get.find<GlobalController>().t(controller.totalApprovedOrder.value.toString()), Colors.green),
+                        statCard(Get.find<GlobalController>().t("Canceled Orders"),
+                          Get.find<GlobalController>().t(controller.totalCancelOrder.value.toString()), Colors.red),
+                        statCard(Get.find<GlobalController>().t("Pending Orders"),
+                          Get.find<GlobalController>().t(controller.totalPending.value.toString()), Colors.orange),
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Text("Recent Orders",
+                    Text(Get.find<GlobalController>().t("Recent Orders"),
                         style: Theme.of(Get.context!).textTheme.titleLarge),
                     const SizedBox(height: 10),
                     SizedBox(
@@ -310,9 +313,9 @@ class DashboardView extends GetView<DashboardController> {
                           return ListTile(
                             leading:
                             CircleAvatar(child: Text(order.id.toString())),
-                            title: Text("Order #${order.id}"),
+                            title: Text("${Get.find<GlobalController>().t("Order")} #${Get.find<GlobalController>().t(order.id.toString())}"),
                             subtitle: Text(
-                              "Amount: ${order.totalAmount}",
+                              "${Get.find<GlobalController>().t("Amount")}: ${Get.find<GlobalController>().t(order.totalAmount.toString())}",
                             ),
                             trailing: orderStatusChip(order.confirmationStatus.toString()),
                           );
@@ -330,7 +333,7 @@ class DashboardView extends GetView<DashboardController> {
   }
 
 
-  Widget statCard(String title, int value, Color color) {
+  Widget statCard(String title, String value, Color color) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -382,7 +385,7 @@ class DashboardView extends GetView<DashboardController> {
     }
 
     return Chip(
-      label: Text(status.toUpperCase(), style: const TextStyle(color: Colors.white)),
+      label: Text(Get.find<GlobalController>().t(status.toUpperCase()), style: const TextStyle(color: Colors.white)),
       backgroundColor: bgColor,
     );
   }
@@ -417,12 +420,12 @@ class DashboardView extends GetView<DashboardController> {
               activeColor: Colors.white,
               tabBackgroundColor: DashboardView.kMainColor, // Use the static color
               tabBorderRadius: 30,
-              tabs: const [
-                GButton(icon: Icons.home, text: "Home"),
-                GButton(icon: Icons.list_alt, text: "Order List"),
+              tabs:  [
+                GButton(icon: Icons.home, text:  Get.find<GlobalController>().t("Home")),
+                GButton(icon: Icons.list_alt, text:  Get.find<GlobalController>().t("Order List")),
                 GButton(
-                    icon: Icons.monetization_on_outlined, text: "Withdraw"),
-                GButton(icon: Icons.person, text: "Profile"),
+                    icon: Icons.monetization_on_outlined, text:  Get.find<GlobalController>().t("Withdraw")),
+                GButton(icon: Icons.person, text:  Get.find<GlobalController>().t("Profile")),
               ],
             ),
           ),
@@ -469,9 +472,9 @@ class ReviewStatusCard extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children:  [
                   Text(
-                    '⏳ Documents Under Review',
+                    '⏳ ${ Get.find<GlobalController>().t("Documents Under Review")}',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -479,8 +482,7 @@ class ReviewStatusCard extends StatelessWidget {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Your documents have been submitted and are currently under review. '
-                        'You will be able to access all features once your documents are approved.',
+                    Get.find<GlobalController>().t("Your documents have been submitted and are currently under review. You will be able to access all features once your documents are approved."),
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.black54,

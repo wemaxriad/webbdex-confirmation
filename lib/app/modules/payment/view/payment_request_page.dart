@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../globalController/global_controller.dart';
 import '../controller/payment_tabs_controller.dart';
 
 class PaymentRequestPage extends GetView<PaymentTabsController> {
@@ -21,13 +22,13 @@ class PaymentRequestPage extends GetView<PaymentTabsController> {
               Row(
                 children: [
                   _balanceCard(
-                    "Available",
+          Get.find<GlobalController>().t("Available"),
                     data?.totalBalance ?? "0.00",
                     Colors.green,
                   ),
                   const SizedBox(width: 10),
                   _balanceCard(
-                    "Pending",
+          Get.find<GlobalController>().t("Pending"),
                     data?.totalWithdrawPending ?? "0.00",
                     Colors.orange,
                   ),
@@ -36,13 +37,13 @@ class PaymentRequestPage extends GetView<PaymentTabsController> {
 
               const SizedBox(height: 20),
               _inputField(
-                label: "Amount ",
+                label: Get.find<GlobalController>().t("Amount "),
                 icon: Icons.payments,
                 controller: controller.amountController,
               ),
               const SizedBox(height: 12),
               _inputField(
-                label: "Note (optional)",
+                label: Get.find<GlobalController>().t("Note (optional)"),
                 icon: Icons.note,
                 controller: controller.requestNoteController,
                 maxLines: 3,
@@ -58,7 +59,7 @@ class PaymentRequestPage extends GetView<PaymentTabsController> {
                       : controller.submitWithdraw,
                   child: controller.isSubmitting.value
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Submit Withdrawal"),
+                      :  Text(Get.find<GlobalController>().t("Submit Withdrawal")),
                 ),
               ),
             ],

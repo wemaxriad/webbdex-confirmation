@@ -118,7 +118,7 @@ class ProfileView extends StatelessWidget {
             ),
             // --- Menu List (Functional Section) ---
             _buildMenuItem(
-              title: Get.find<GlobalController>().t("My orders"),
+              title: Get.find<GlobalController>().t("My Orders"),
               icon: Icons.receipt_long,
               onTap: () {
                 Get.toNamed(AppRoutes.ORDER);

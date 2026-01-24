@@ -37,7 +37,7 @@ class PaymentRequestPage extends GetView<PaymentTabsController> {
 
               const SizedBox(height: 20),
               _inputField(
-                label: Get.find<GlobalController>().t("Amount "),
+                label: Get.find<GlobalController>().t("Amount"),
                 icon: Icons.payments,
                 controller: controller.amountController,
               ),

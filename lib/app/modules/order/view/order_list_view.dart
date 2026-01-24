@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../globalController/global_controller.dart';
 import '../../../model/order_model.dart';
 import '../../order/controller/order_details_controller.dart';
 import '../../order/view/order_details_view.dart';
@@ -16,15 +17,16 @@ class OrderListView extends GetView<MyOrdersController> {
 
   @override
   Widget build(BuildContext context) {
+    final globalController = Get.find<GlobalController>();
     return DefaultTabController(
       length: 3,
       child: Column(
         children: [
-          const TabBar(
+          TabBar(
             tabs: [
-              Tab(text: "Pending"),
-              Tab(text: "Assign"),
-              Tab(text: "Confirmed"),
+              Tab(text: globalController.t("pending")),
+              Tab(text: globalController.t("assign")),
+              Tab(text: globalController.t("confirmed")),
             ],
           ),
           Expanded(
@@ -36,53 +38,58 @@ class OrderListView extends GetView<MyOrdersController> {
                     tabSearchBar(
                       controller: controller.pendingSearchCtrl,
                       onSearch: () => controller.getOrderHistoryData(reset: true),
+                      hintText: globalController.t("search_hint"),
                     ),
                     Expanded(
                       child: Obx(() => ordersList(
                         controller.orderList,
                         controller.isMoreLoading.value,
                             () => controller.getOrderHistoryData(),
+                        emptyText: globalController.t("no_order_list"),
                       )),
                     ),
                   ],
                 ),
 
-                /// 🟢 Confirmed
+                /// 🟢 Assign
                 Column(
                   children: [
                     tabSearchBar(
                       controller: controller.assignSearchCtrl,
                       onSearch: () => controller.getAssignOrderHistoryData(reset: true),
+                      hintText: globalController.t("search_hint"),
                     ),
                     Expanded(
                       child: Obx(() => assignOrdersList(
                         controller.assignOrderList,
                         controller.assignOrderIsMoreLoading.value,
                             () => controller.getAssignOrderHistoryData(),
+                        emptyText: globalController.t("no_order_list"),
                       )),
                     ),
                   ],
                 ),
 
-                /// ⚫ Canceled
+                /// ⚫ Confirmed
                 Column(
                   children: [
                     tabSearchBar(
                       controller: controller.confirmedSearchCtrl,
                       onSearch: () => controller.getConfirmedOrderHistoryData(reset: true),
+                      hintText: globalController.t("search_hint"),
                     ),
                     Expanded(
                       child: Obx(() => confirmOrdersList(
                         controller.confirmedOrderList,
                         controller.confirmedOrderIsMoreLoading.value,
                             () => controller.getConfirmedOrderHistoryData(),
+                        emptyText: globalController.t("no_order_list"),
                       )),
                     ),
                   ],
                 ),
               ],
-            )
-
+            ),
           ),
         ],
       ),
@@ -92,7 +99,9 @@ class OrderListView extends GetView<MyOrdersController> {
   Widget tabSearchBar({
     required TextEditingController controller,
     required VoidCallback onSearch,
+    String? hintText,
   }) {
+    final globalController = Get.find<GlobalController>();
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 12, 12, 6),
       padding: const EdgeInsets.all(10),
@@ -116,7 +125,7 @@ class OrderListView extends GetView<MyOrdersController> {
               textInputAction: TextInputAction.search,
               onSubmitted: (_) => onSearch(),
               decoration: InputDecoration(
-                hintText: 'Order ID / Customer Name / Phone',
+                hintText: hintText ?? globalController.t('order_id_customer_name_phone'),
                 hintStyle: TextStyle(color: Colors.grey.shade500),
                 prefixIcon: const Icon(Icons.search, size: 22),
                 suffixIcon: controller.text.isNotEmpty
@@ -130,13 +139,14 @@ class OrderListView extends GetView<MyOrdersController> {
                     : null,
                 filled: true,
                 fillColor: Colors.grey.shade100,
-                contentPadding:
-                const EdgeInsets.symmetric(vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10),topLeft: Radius.circular(10)),
+                  borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(10), topLeft: Radius.circular(10)),
                   borderSide: BorderSide.none,
                 ),
               ),
+
             ),
           ),
 
@@ -147,17 +157,23 @@ class OrderListView extends GetView<MyOrdersController> {
             height: 53,
             child: ElevatedButton.icon(
               onPressed: onSearch,
-              icon: const Icon(Icons.search, size: 18,color: Colors.white,),
-              label: const Text(
-                'Search',
-                style: TextStyle(fontWeight: FontWeight.w600,color: Colors.white),
+              icon: const Icon(
+                Icons.search,
+                size: 18,
+                color: Colors.white,
+              ),
+              label: Text(
+                Get.find<GlobalController>().t('search'),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
-                padding:
-                const EdgeInsets.symmetric(horizontal: 18),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(10),topRight: Radius.circular(10)),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(10),
+                      topRight: Radius.circular(10)),
                 ),
                 elevation: 2,
               ),
@@ -168,46 +184,41 @@ class OrderListView extends GetView<MyOrdersController> {
     );
   }
 
-
-
   Widget ordersList(
       List<OrderList> orderList,
       bool isLoading,
-      VoidCallback loadMore,
-      ) {
+      VoidCallback loadMore, {
+        String emptyText = '',
+      }) {
     return RefreshIndicator(
       onRefresh: controller.refreshOrders,
       child: Obx(() {
-        if (controller.isMoreLoading.value &&
-            orderList.isEmpty) {
+        if (isLoading && orderList.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
         if (orderList.isEmpty) {
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: const [
-              SizedBox(height: 300),
-              Center(child: Text("No order list")),
+            children: [
+              const SizedBox(height: 300),
+              Center(child: Text(emptyText)),
             ],
           );
         }
 
         return NotificationListener<ScrollNotification>(
           onNotification: (scroll) {
-            if (scroll.metrics.pixels ==
-                scroll.metrics.maxScrollExtent &&
-                !controller.isMoreLoading.value) {
+            if (scroll.metrics.pixels == scroll.metrics.maxScrollExtent &&
+                !isLoading) {
               loadMore();
-              // controller.getOrderHistoryData();
             }
             return false;
           },
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
-            itemCount: orderList.length +
-                (controller.isMoreLoading.value ? 1 : 0),
+            itemCount: orderList.length + (isLoading ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == orderList.length) {
                 return const Padding(
@@ -217,127 +228,38 @@ class OrderListView extends GetView<MyOrdersController> {
               }
 
               final item = orderList[index];
-              return _OrderCard(item,context);
+              return _OrderCard(item, context);
             },
           ),
         );
       }),
     );
   }
+
+// assignOrdersList and confirmOrdersList can simply reuse ordersList with their own params
 
   Widget assignOrdersList(
       List<OrderList> orderList,
       bool isLoading,
-      VoidCallback loadMore,
-      ) {
-    return RefreshIndicator(
-      onRefresh: controller.refreshOrders,
-      child: Obx(() {
-        if (controller.assignOrderIsMoreLoading.value &&
-            orderList.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (orderList.isEmpty) {
-          return ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: const [
-              SizedBox(height: 300),
-              Center(child: Text("No order list")),
-            ],
-          );
-        }
-
-        return NotificationListener<ScrollNotification>(
-          onNotification: (scroll) {
-            if (scroll.metrics.pixels ==
-                scroll.metrics.maxScrollExtent &&
-                !controller.assignOrderIsMoreLoading.value) {
-              loadMore();
-              // controller.getOrderHistoryData();
-            }
-            return false;
-          },
-          child: ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            itemCount: orderList.length +
-                (controller.assignOrderIsMoreLoading.value ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == orderList.length) {
-                return const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              final item = orderList[index];
-              return _OrderCard(item,context);
-            },
-          ),
-        );
-      }),
-    );
-  }
+      VoidCallback loadMore, {
+        String emptyText = '',
+      }) =>
+      ordersList(orderList, isLoading, loadMore, emptyText: emptyText);
 
   Widget confirmOrdersList(
       List<OrderList> orderList,
       bool isLoading,
-      VoidCallback loadMore,
-      ) {
-    return RefreshIndicator(
-      onRefresh: controller.refreshOrders,
-      child: Obx(() {
-        if (controller.confirmedOrderIsMoreLoading.value &&
-            orderList.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      VoidCallback loadMore, {
+        String emptyText = '',
+      }) =>
+      ordersList(orderList, isLoading, loadMore, emptyText: emptyText);
 
-        if (orderList.isEmpty) {
-          return ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: const [
-              SizedBox(height: 300),
-              Center(child: Text("No order list")),
-            ],
-          );
-        }
-
-        return NotificationListener<ScrollNotification>(
-          onNotification: (scroll) {
-            if (scroll.metrics.pixels ==
-                scroll.metrics.maxScrollExtent &&
-                !controller.confirmedOrderIsMoreLoading.value) {
-              loadMore();
-              // controller.getOrderHistoryData();
-            }
-            return false;
-          },
-          child: ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            itemCount: orderList.length +
-                (controller.confirmedOrderIsMoreLoading.value ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == orderList.length) {
-                return const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              final item = orderList[index];
-              return _OrderCard(item,context);
-            },
-          ),
-        );
-      }),
-    );
-  }
 
 
 
   Widget _OrderCard(OrderList order, BuildContext context) {
+    final globalController = Get.find<GlobalController>();
+
     return Card(
       elevation: 2,
       margin: const EdgeInsetsDirectional.only(bottom: 12),
@@ -345,7 +267,7 @@ class OrderListView extends GetView<MyOrdersController> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          controller.getConfirmedOrderDetailsData(order.id.toString(),order.tenantId.toString());
+          controller.getConfirmedOrderDetailsData(order.id.toString(), order.tenantId.toString());
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
@@ -368,7 +290,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Order ID: #${order.id}",
+                          '${globalController.t("order_id")}: #${order.id}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
@@ -379,7 +301,9 @@ class OrderListView extends GetView<MyOrdersController> {
                   ),
                   if (order.confirmationStatus != "approved")
                     ElevatedButton.icon(
-                      onPressed: () => order.confirmationStatus == 'pending' ? showChangeStatusAssignDialog(order) : showChangeStatusConfirmDialog(order),
+                      onPressed: () => order.confirmationStatus == 'pending'
+                          ? showChangeStatusAssignDialog(order)
+                          : showChangeStatusConfirmDialog(order),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xff39C367),
                         padding: const EdgeInsets.symmetric(
@@ -398,9 +322,9 @@ class OrderListView extends GetView<MyOrdersController> {
                         size: 16,
                         color: Colors.white,
                       ),
-                      label: const Text(
-                        'Change Status',
-                        style: TextStyle(
+                      label: Text(
+                        globalController.t('change_status'),
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -416,7 +340,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 children: [
                   Expanded(
                     child: Text(
-                      order.customerName ?? 'N/A',
+                      order.customerName ?? globalController.t('not_available'),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -456,7 +380,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            order.customerPhone ?? 'N/A',
+                            order.customerPhone ?? globalController.t('not_available'),
                             style: const TextStyle(fontSize: 13),
                           ),
                         ),
@@ -466,15 +390,12 @@ class OrderListView extends GetView<MyOrdersController> {
                             onPressed: () {
                               final callCtrl = Get.put(CallController());
                               Get.to(() => const OrderCallScreenPage());
-                              callCtrl.makeCall(order,
-                                  order.customerPhone ?? '',
-                              );
+                              callCtrl.makeCall(order, order.customerPhone ?? '');
                             },
-                            // onPressed: () => openDialPad("${order.customerPhone}"),
-                            icon: const Icon(Icons.call, size: 16,color: Colors.white),
-                            label: const Text(
-                              'Call',
-                              style: TextStyle(fontSize: 12,color: Colors.white),
+                            icon: const Icon(Icons.call, size: 16, color: Colors.white),
+                            label: Text(
+                              globalController.t('call'),
+                              style: const TextStyle(fontSize: 12, color: Colors.white),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xff39C367),
@@ -495,8 +416,8 @@ class OrderListView extends GetView<MyOrdersController> {
                           ClipboardData(text: order.customerEmail ?? ''),
                         );
                         Get.snackbar(
-                          'Copied',
-                          'Email copied to clipboard',
+                          globalController.t('copied'),
+                          globalController.t('email_copied_to_clipboard'),
                           snackPosition: SnackPosition.BOTTOM,
                           margin: const EdgeInsets.all(12),
                         );
@@ -518,7 +439,7 @@ class OrderListView extends GetView<MyOrdersController> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              order.customerEmail ?? 'N/A',
+                              order.customerEmail ?? globalController.t('not_available'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 13),
@@ -540,9 +461,9 @@ class OrderListView extends GetView<MyOrdersController> {
                 children: [
                   Row(
                     children: [
-                      const Text(
-                        "Billed Amount: ",
-                        style: TextStyle(fontWeight: FontWeight.w500),
+                      Text(
+                        '${globalController.t("billed_amount")}: ',
+                        style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                       Text(
                         "${order.totalAmount}",
@@ -550,11 +471,12 @@ class OrderListView extends GetView<MyOrdersController> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   statusBadge(order.confirmationStatusName!),
                 ],
               ),
-              Text('Preferred Language: ${order.confirmationPreferredLanguage ?? 'N/A'}',
+              Text(
+                '${globalController.t("preferred_language")}: ${order.confirmationPreferredLanguage ?? globalController.t('not_available')}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 13),
@@ -565,6 +487,7 @@ class OrderListView extends GetView<MyOrdersController> {
       ),
     );
   }
+
 
   /// 📞 Open phone dial pad
   Future<void> openDialPad(String phone) async {
@@ -621,7 +544,9 @@ class OrderListView extends GetView<MyOrdersController> {
   }
 
   void showChangeStatusConfirmDialog(OrderList order) {
-    controller.selectedStatus.value = 'Select Status';
+    final globalController = Get.find<GlobalController>();
+
+    controller.selectedStatus.value = globalController.t('select_status'); // localize default value
     controller.statusNotes.value = '';
     controller.clearAttachment(); // Clear previous attachments
 
@@ -638,9 +563,9 @@ class OrderListView extends GetView<MyOrdersController> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Change Status",
-                      style: TextStyle(
+                    Text(
+                      globalController.t('change_status'),
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -657,9 +582,9 @@ class OrderListView extends GetView<MyOrdersController> {
                 ),
                 const Divider(),
                 const SizedBox(height: 10),
-                const Text(
-                  "Select Status*",
-                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                Text(
+                  globalController.t('select_status') + '*',
+                  style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
                 const SizedBox(height: 5),
                 Obx(
@@ -671,8 +596,7 @@ class OrderListView extends GetView<MyOrdersController> {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value:
-                        controller.statusOptions.contains(
+                        value: controller.statusOptions.contains(
                           controller.selectedStatus.value,
                         )
                             ? controller.selectedStatus.value
@@ -691,31 +615,32 @@ class OrderListView extends GetView<MyOrdersController> {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(
-                              value,
+                              value == globalController.t('select_status')
+                                  ? value
+                                  : globalController.t(value),
                               style: TextStyle(
-                                color: value == 'Select Status'
+                                color: value == globalController.t('select_status')
                                     ? Colors.grey
                                     : Colors.black,
                               ),
                             ),
                           );
-                        })
-                            .toList(),
+                        }).toList(),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 15),
-                const Text(
-                  "Note",
-                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                Text(
+                  globalController.t('note'),
+                  style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
                 const SizedBox(height: 5),
                 TextField(
                   maxLines: 4,
                   onChanged: controller.updateStatusNotes,
                   decoration: InputDecoration(
-                    hintText: 'Add notes here...',
+                    hintText: globalController.t('add_notes_here'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(color: Colors.grey.shade300),
@@ -735,9 +660,9 @@ class OrderListView extends GetView<MyOrdersController> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                const Text(
-                  "Attachment",
-                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                Text(
+                  globalController.t('attachment'),
+                  style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
                 const SizedBox(height: 5),
                 Obx(() {
@@ -746,9 +671,9 @@ class OrderListView extends GetView<MyOrdersController> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         OutlinedButton.icon(
-                        onPressed: controller.showImageSourceSheet,
+                          onPressed: controller.showImageSourceSheet,
                           icon: const Icon(Icons.image_outlined),
-                          label: const Text("Attach Image"),
+                          label: Text(globalController.t('attach_image')),
                         ),
                       ],
                     );
@@ -790,7 +715,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         OutlinedButton.icon(
                           onPressed: controller.pickAudioAttachment,
                           icon: const Icon(Icons.mic_none),
-                          label: const Text("Attach Audio"),
+                          label: Text(globalController.t('attach_audio')),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.grey.shade700,
                             side: BorderSide(color: Colors.grey.shade300),
@@ -842,9 +767,9 @@ class OrderListView extends GetView<MyOrdersController> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(
+                          child: Text(
+                            globalController.t('cancel'),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
@@ -858,20 +783,23 @@ class OrderListView extends GetView<MyOrdersController> {
                             () => SizedBox(
                           height: 45,
                           child: ElevatedButton(
-                            onPressed:
-                            controller.selectedStatus.value ==
-                                'Select Status'
+                            onPressed: controller.selectedStatus.value ==
+                                globalController.t('select_status')
                                 ? null
-                                : () => controller.submitStatusChange(order.id.toString(),order.tenantId.toString(),controller.selectedStatus.value),
+                                : () => controller.submitStatusChange(
+                              order.id.toString(),
+                              order.tenantId.toString(),
+                              controller.selectedStatus.value,
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text(
-                              'Yes, Sure',
-                              style: TextStyle(
+                            child: Text(
+                              globalController.t('yes_sure'),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -890,7 +818,10 @@ class OrderListView extends GetView<MyOrdersController> {
     );
   }
 
+
   void showChangeStatusAssignDialog(OrderList order) {
+
+    final globalController = Get.find<GlobalController>();
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -904,9 +835,9 @@ class OrderListView extends GetView<MyOrdersController> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Confirmation Status",
-                      style: TextStyle(
+                    Text(
+                      globalController.t('confirmation_status'),
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -923,9 +854,9 @@ class OrderListView extends GetView<MyOrdersController> {
                 ),
                 const Divider(),
                 const SizedBox(height: 10),
-                const Text(
-                  "Select Status *",
-                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                Text(
+                  globalController.t('select_status') + ' *',
+                  style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
                 const SizedBox(height: 5),
                 Obx(
@@ -937,8 +868,7 @@ class OrderListView extends GetView<MyOrdersController> {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value:
-                        controller.assignStatusOptions.contains(
+                        value: controller.assignStatusOptions.contains(
                           controller.assignSelectedStatus.value,
                         )
                             ? controller.assignSelectedStatus.value
@@ -950,26 +880,24 @@ class OrderListView extends GetView<MyOrdersController> {
                           fontSize: 16,
                         ),
                         onChanged: (String? newValue) {
-                          controller.assignSelectedStatus.value = newValue??'';
+                          controller.assignSelectedStatus.value = newValue ?? '';
                         },
                         items: controller.assignStatusOptions
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(
-                              value,
-                              style: TextStyle(
-                                color:Colors.black,
+                              globalController.t(value),
+                              style: const TextStyle(
+                                color: Colors.black,
                               ),
                             ),
                           );
-                        })
-                            .toList(),
+                        }).toList(),
                       ),
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -985,9 +913,9 @@ class OrderListView extends GetView<MyOrdersController> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(
+                          child: Text(
+                            globalController.t('cancel'),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1000,22 +928,26 @@ class OrderListView extends GetView<MyOrdersController> {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () => controller.submitStatusChange(order.id.toString(),order.tenantId.toString(),controller.assignSelectedStatus.value),
+                          onPressed: () => controller.submitStatusChange(
+                            order.id.toString(),
+                            order.tenantId.toString(),
+                            controller.assignSelectedStatus.value,
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Yes, Sure',
-                            style: TextStyle(
+                          child: Text(
+                            globalController.t('yes_sure'),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      )
+                      ),
                     ),
                   ],
                 ),
@@ -1026,6 +958,7 @@ class OrderListView extends GetView<MyOrdersController> {
       ),
     );
   }
+
 
 
 }

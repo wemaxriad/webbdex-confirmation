@@ -57,6 +57,8 @@ class OrderList {
   String? globalId;
   String? customerName;
   String? customerPhone;
+  String? customerPhoneCode;
+  String? customerCountryName;
   String? customerEmail;
   String? totalAmount;
   String? confirmationStatus;
@@ -73,6 +75,8 @@ class OrderList {
         this.globalId,
         this.customerName,
         this.customerPhone,
+        this.customerPhoneCode,
+        this.customerCountryName,
         this.customerEmail,
         this.totalAmount,
         this.confirmationStatus,
@@ -89,6 +93,8 @@ class OrderList {
     globalId = json['global_id'];
     customerName = json['customer_name'];
     customerPhone = json['customer_phone'];
+    customerPhoneCode = json['customer_phone_code'];
+    customerCountryName = json['customer_country_name'];
     customerEmail = json['customer_email'];
     totalAmount = json['total_amount'];
     confirmationStatus = json['confirmation_status'];
@@ -107,6 +113,8 @@ class OrderList {
     data['global_id'] = this.globalId;
     data['customer_name'] = this.customerName;
     data['customer_phone'] = this.customerPhone;
+    data['customer_phone_code'] = this.customerPhoneCode;
+    data['customer_country_name'] = this.customerCountryName;
     data['customer_email'] = this.customerEmail;
     data['total_amount'] = this.totalAmount;
     data['confirmation_status'] = this.confirmationStatus;

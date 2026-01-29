@@ -35,17 +35,68 @@ class OrderListView extends GetView<MyOrdersController> {
                 /// 🔴 Pending
                 Column(
                   children: [
+                    Obx(
+                          () => Container(
+                            margin: const EdgeInsets.fromLTRB(12, 8, 12, 5),
+                            padding: const EdgeInsets.only(left: 10,bottom:5,top:5,right: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: globalController.countries.contains(
+                              controller.selectedCountry.value,
+                            )
+                                ? controller.selectedCountry.value
+                                : globalController.countries.first,
+                            isExpanded: true,
+                            icon: const Icon(Icons.arrow_drop_down),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                            onChanged: (String? newValue) {
+                              controller.updateSelectedCountry(newValue);
+                            },
+                            items: globalController.countries
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value == globalController.t('Select Country')
+                                      ? value
+                                      : globalController.t(value),
+                                  style: TextStyle(
+                                    color: value == globalController.t('Select Country')
+                                        ? Colors.grey
+                                        : Colors.black,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
                     tabSearchBar(
                       controller: controller.pendingSearchCtrl,
                       onSearch: () => controller.getOrderHistoryData(reset: true),
-                      hintText: globalController.t("search_hint"),
+                      hintText: globalController.t("Customer name phone"),
                     ),
                     Expanded(
                       child: Obx(() => ordersList(
                         controller.orderList,
                         controller.isMoreLoading.value,
                             () => controller.getOrderHistoryData(),
-                        emptyText: globalController.t("no_order_list"),
+                        emptyText: globalController.t("No Order List"),
                       )),
                     ),
                   ],
@@ -57,14 +108,14 @@ class OrderListView extends GetView<MyOrdersController> {
                     tabSearchBar(
                       controller: controller.assignSearchCtrl,
                       onSearch: () => controller.getAssignOrderHistoryData(reset: true),
-                      hintText: globalController.t("search_hint"),
+                      hintText: globalController.t("Customer name phone"),
                     ),
                     Expanded(
                       child: Obx(() => assignOrdersList(
                         controller.assignOrderList,
                         controller.assignOrderIsMoreLoading.value,
                             () => controller.getAssignOrderHistoryData(),
-                        emptyText: globalController.t("no_order_list"),
+                        emptyText: globalController.t("No Order List"),
                       )),
                     ),
                   ],
@@ -76,14 +127,14 @@ class OrderListView extends GetView<MyOrdersController> {
                     tabSearchBar(
                       controller: controller.confirmedSearchCtrl,
                       onSearch: () => controller.getConfirmedOrderHistoryData(reset: true),
-                      hintText: globalController.t("search_hint"),
+                      hintText: globalController.t("Customer name phone"),
                     ),
                     Expanded(
                       child: Obx(() => confirmOrdersList(
                         controller.confirmedOrderList,
                         controller.confirmedOrderIsMoreLoading.value,
                             () => controller.getConfirmedOrderHistoryData(),
-                        emptyText: globalController.t("no_order_list"),
+                        emptyText: globalController.t("No Order List"),
                       )),
                     ),
                   ],
@@ -103,8 +154,8 @@ class OrderListView extends GetView<MyOrdersController> {
   }) {
     final globalController = Get.find<GlobalController>();
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 12, 12, 6),
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.fromLTRB(12, 2, 12, 2),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -125,7 +176,7 @@ class OrderListView extends GetView<MyOrdersController> {
               textInputAction: TextInputAction.search,
               onSubmitted: (_) => onSearch(),
               decoration: InputDecoration(
-                hintText: hintText ?? globalController.t('order_id_customer_name_phone'),
+                hintText: hintText ?? globalController.t('Order ID customer name phone'),
                 hintStyle: TextStyle(color: Colors.grey.shade500),
                 prefixIcon: const Icon(Icons.search, size: 22),
                 suffixIcon: controller.text.isNotEmpty
@@ -163,7 +214,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 color: Colors.white,
               ),
               label: Text(
-                Get.find<GlobalController>().t('search'),
+                Get.find<GlobalController>().t('Search'),
                 style: const TextStyle(
                     fontWeight: FontWeight.w600, color: Colors.white),
               ),
@@ -290,7 +341,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${globalController.t("order_id")}: #${order.id}',
+                          '${globalController.t("Order ID")}: #${order.id}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
@@ -323,7 +374,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         color: Colors.white,
                       ),
                       label: Text(
-                        globalController.t('change_status'),
+                        globalController.t('Change Status'),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.white,
@@ -340,7 +391,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 children: [
                   Expanded(
                     child: Text(
-                      order.customerName ?? globalController.t('not_available'),
+                      order.customerName ?? globalController.t('Not Available'),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -360,7 +411,7 @@ class OrderListView extends GetView<MyOrdersController> {
               const SizedBox(height: 10),
 
               /// 📞 Phone + Call Button (only if not pending)
-              if (order.confirmationStatus.toString() != 'pending')
+              if (order.confirmationStatus.toString() != 'approved')
                 Column(
                   children: [
                     Row(
@@ -380,7 +431,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            order.customerPhone ?? globalController.t('not_available'),
+                            order.customerPhone ?? globalController.t('Not Available'),
                             style: const TextStyle(fontSize: 13),
                           ),
                         ),
@@ -394,7 +445,7 @@ class OrderListView extends GetView<MyOrdersController> {
                             },
                             icon: const Icon(Icons.call, size: 16, color: Colors.white),
                             label: Text(
-                              globalController.t('call'),
+                              globalController.t('Call'),
                               style: const TextStyle(fontSize: 12, color: Colors.white),
                             ),
                             style: ElevatedButton.styleFrom(
@@ -416,8 +467,8 @@ class OrderListView extends GetView<MyOrdersController> {
                           ClipboardData(text: order.customerEmail ?? ''),
                         );
                         Get.snackbar(
-                          globalController.t('copied'),
-                          globalController.t('email_copied_to_clipboard'),
+                          globalController.t('Copied'),
+                          globalController.t('Email copied to clipboard'),
                           snackPosition: SnackPosition.BOTTOM,
                           margin: const EdgeInsets.all(12),
                         );
@@ -439,7 +490,7 @@ class OrderListView extends GetView<MyOrdersController> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              order.customerEmail ?? globalController.t('not_available'),
+                              order.customerEmail ?? globalController.t('Not Available'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 13),
@@ -462,7 +513,7 @@ class OrderListView extends GetView<MyOrdersController> {
                   Row(
                     children: [
                       Text(
-                        '${globalController.t("billed_amount")}: ',
+                        '${globalController.t("Billed Amount")}: ',
                         style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                       Text(
@@ -476,7 +527,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 ],
               ),
               Text(
-                '${globalController.t("preferred_language")}: ${order.confirmationPreferredLanguage ?? globalController.t('not_available')}',
+                '${globalController.t("Preferred Language")}: ${order.confirmationPreferredLanguage ?? globalController.t('Not Available')}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 13),
@@ -546,7 +597,7 @@ class OrderListView extends GetView<MyOrdersController> {
   void showChangeStatusConfirmDialog(OrderList order) {
     final globalController = Get.find<GlobalController>();
 
-    controller.selectedStatus.value = globalController.t('select_status'); // localize default value
+    controller.selectedStatus.value = globalController.t('Select Status'); // localize default value
     controller.statusNotes.value = '';
     controller.clearAttachment(); // Clear previous attachments
 
@@ -564,7 +615,7 @@ class OrderListView extends GetView<MyOrdersController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      globalController.t('change_status'),
+                      globalController.t('Change Status'),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -583,7 +634,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 const Divider(),
                 const SizedBox(height: 10),
                 Text(
-                  globalController.t('select_status') + '*',
+                  globalController.t('Select Status') + '*',
                   style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
                 const SizedBox(height: 5),
@@ -615,11 +666,11 @@ class OrderListView extends GetView<MyOrdersController> {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(
-                              value == globalController.t('select_status')
+                              value == globalController.t('Select Status')
                                   ? value
                                   : globalController.t(value),
                               style: TextStyle(
-                                color: value == globalController.t('select_status')
+                                color: value == globalController.t('Select Status')
                                     ? Colors.grey
                                     : Colors.black,
                               ),
@@ -640,7 +691,7 @@ class OrderListView extends GetView<MyOrdersController> {
                   maxLines: 4,
                   onChanged: controller.updateStatusNotes,
                   decoration: InputDecoration(
-                    hintText: globalController.t('add_notes_here'),
+                    hintText: globalController.t('Add Notes Here'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(color: Colors.grey.shade300),
@@ -661,7 +712,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 ),
                 const SizedBox(height: 15),
                 Text(
-                  globalController.t('attachment'),
+                  globalController.t('Attachment'),
                   style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
                 const SizedBox(height: 5),
@@ -673,7 +724,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         OutlinedButton.icon(
                           onPressed: controller.showImageSourceSheet,
                           icon: const Icon(Icons.image_outlined),
-                          label: Text(globalController.t('attach_image')),
+                          label: Text(globalController.t('Attach Image')),
                         ),
                       ],
                     );
@@ -715,7 +766,7 @@ class OrderListView extends GetView<MyOrdersController> {
                         OutlinedButton.icon(
                           onPressed: controller.pickAudioAttachment,
                           icon: const Icon(Icons.mic_none),
-                          label: Text(globalController.t('attach_audio')),
+                          label: Text(globalController.t('Attach Audio')),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.grey.shade700,
                             side: BorderSide(color: Colors.grey.shade300),
@@ -768,7 +819,7 @@ class OrderListView extends GetView<MyOrdersController> {
                             ),
                           ),
                           child: Text(
-                            globalController.t('cancel'),
+                            globalController.t('Cancel'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -784,7 +835,7 @@ class OrderListView extends GetView<MyOrdersController> {
                           height: 45,
                           child: ElevatedButton(
                             onPressed: controller.selectedStatus.value ==
-                                globalController.t('select_status')
+                                globalController.t('Select Status')
                                 ? null
                                 : () => controller.submitStatusChange(
                               order.id.toString(),
@@ -798,7 +849,7 @@ class OrderListView extends GetView<MyOrdersController> {
                               ),
                             ),
                             child: Text(
-                              globalController.t('yes_sure'),
+                              globalController.t('Yes Sure'),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -836,7 +887,7 @@ class OrderListView extends GetView<MyOrdersController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      globalController.t('confirmation_status'),
+                      globalController.t('Confirmation Status'),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -855,7 +906,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 const Divider(),
                 const SizedBox(height: 10),
                 Text(
-                  globalController.t('select_status') + ' *',
+                  globalController.t('Select Status') + ' *',
                   style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
                 const SizedBox(height: 5),
@@ -914,7 +965,7 @@ class OrderListView extends GetView<MyOrdersController> {
                             ),
                           ),
                           child: Text(
-                            globalController.t('cancel'),
+                            globalController.t('Cancel'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -940,7 +991,7 @@ class OrderListView extends GetView<MyOrdersController> {
                             ),
                           ),
                           child: Text(
-                            globalController.t('yes_sure'),
+                            globalController.t('Yes Sure'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

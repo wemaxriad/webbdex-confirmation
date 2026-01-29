@@ -14,6 +14,7 @@ import '../view/order_details_view.dart';
 class MyOrdersController extends GetxController {
   // --- Change Status Dialog State ---
   var selectedStatus = 'Select Status'.obs;
+  var selectedCountry = 'Egypt'.obs;
   var assignSelectedStatus = 'Assign Order'.obs;
   var statusNotes = ''.obs;
   /// Attachment
@@ -73,7 +74,7 @@ class MyOrdersController extends GetxController {
       isLoading(reset);
       isMoreLoading(!reset);
 
-      final data = await _service.getOrderHistoryData(page: currentPage,search: pendingSearchCtrl.text,);
+      final data = await _service.getOrderHistoryData(page: currentPage,search: pendingSearchCtrl.text,country:selectedCountry.value);
       if (data != null) {
         lastPage =  data.lastPage??1;
         orderList.addAll(data.orderList ?? []);
@@ -160,8 +161,15 @@ class MyOrdersController extends GetxController {
     await getConfirmedOrderHistoryData(reset: true);
   }
 
+  void updateSelectedCountry(String? newCountry) async {
+    if (newCountry != null) {
+      selectedCountry.value = newCountry;
+      pendingSearchCtrl.clear();
+      await getOrderHistoryData(reset: true);
+    }
+  }
 
-  // --- Status Change Logic ---
+      // --- Status Change Logic ---
   void updateSelectedStatus(String? newStatus) {
     if (newStatus != null) {
       selectedStatus.value = newStatus;

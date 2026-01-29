@@ -55,6 +55,8 @@ dependencies:
   permission_handler: ^12.0.1
   firebase_core: ^3.6.0
   firebase_messaging: ^15.1.0
+  iconsax: ^0.0.8
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:

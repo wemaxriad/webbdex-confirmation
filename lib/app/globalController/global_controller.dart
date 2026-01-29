@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../modules/auth/model/CountryModel.dart';
 import '../modules/auth/model/LanguagesModel.dart';
 import '../services/api-list.dart';
 import '../services/server.dart';
@@ -27,6 +28,7 @@ class GlobalController extends GetxController {
   @override
   void onInit() {
 
+    getCountryList();
     getLanguagesList();
     getLanguagesFileList();
     // TODO: implement onInit
@@ -34,6 +36,33 @@ class GlobalController extends GetxController {
 
   }
 
+  Future<void> getCountryList() async {
+    final response = await server.getRequest(
+      endPoint: ApiList.countryList!,
+    );
+
+    if (response == null) {
+      debugPrint("API response is null");
+      return;
+    }
+
+    if (response.statusCode == 200) {
+      try {
+        final jsonResponse = json.decode(response.body);
+        final countryModel = CountryModel.fromJson(jsonResponse);
+
+        countries.assignAll(countryModel.countries!);
+
+        if (countries.isNotEmpty) {
+          selectedCountry.value = countries.first;
+        }
+      } catch (e) {
+        debugPrint("JSON parse error: $e");
+      }
+    } else {
+      debugPrint("API failed: ${response.statusCode}");
+    }
+  }
 
 
   Future<void> getLanguagesList() async {

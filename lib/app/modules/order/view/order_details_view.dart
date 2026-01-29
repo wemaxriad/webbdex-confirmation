@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../globalController/global_controller.dart';
 import '../../../utils/constant_colors.dart';
 import '../controller/order_controller.dart';
 import '../model/orderDetailsModel.dart';
@@ -15,8 +16,7 @@ class OrderDetailsView extends StatelessWidget {
       backgroundColor: const Color(0xffF5F5F5),
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: const Text(
-          'Order Details',
+        title:  Text(Get.find<GlobalController>().t("Order Details"),
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -50,7 +50,7 @@ class OrderDetailsView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Order #${order.id}",
+                          "${Get.find<GlobalController>().t("Order")} #${order.id}",
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -71,12 +71,12 @@ class OrderDetailsView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         _statusChip(
-                          "Payment: ${order.paymentStatus}",
+                          "${Get.find<GlobalController>().t("Payment")}: ${order.paymentStatus}",
                           Colors.green,
                         ),
                         const SizedBox(height: 8),
                         _statusChip(
-                          "Order: ${order.status}",
+                          "${Get.find<GlobalController>().t("Order")}: ${order.status}",
                           Colors.orange,
                         ),
                       ],
@@ -89,25 +89,25 @@ class OrderDetailsView extends StatelessWidget {
 
               /// ================= ORDER DETAILS =================
               _card(
-                title: "Order Details",
+                title: Get.find<GlobalController>().t("Order Details"),
                 child: Column(
                   children: [
-                    _row("Preferred Language", order.confirmationPreferredLanguage??''),
+                    _row(Get.find<GlobalController>().t("Preferred Language"), order.confirmationPreferredLanguage??''),
                     _divider(),
-                    _row("Customer", " ${order.subtotal}"),
+                    _row(Get.find<GlobalController>().t("Customer"), " ${order.subtotal}"),
                     _divider(),
-                    _row("Subtotal", " ${order.subtotal}"),
+                    _row(Get.find<GlobalController>().t("Subtotal"), " ${order.subtotal}"),
                     _divider(),
-                    _row("Tax", " ${order.productTax}"),
+                    _row(Get.find<GlobalController>().t("Tax"), " ${order.productTax}"),
                     _divider(),
-                    _row("Shipping Cost", " ${order.shippingCost}"),
+                    _row(Get.find<GlobalController>().t("Shipping Cost"), " ${order.shippingCost}"),
                     _divider(),
                     _row(
-                      "Payment method",
+                    Get.find<GlobalController>().t("Payment method"),
                       order.paymentStatus.toString(),
                     ),
                     _divider(),
-                    _row("Total", " ${order.totalAmount}", bold: true),
+                    _row(Get.find<GlobalController>().t("Total"), " ${order.totalAmount}", bold: true),
                   ],
                 ),
               ),
@@ -116,19 +116,19 @@ class OrderDetailsView extends StatelessWidget {
               SizedBox(height: 10,),
               if(order.confirmationDate !=null)
               _card(
-                title: "Confirmation Information",
+                title: Get.find<GlobalController>().t("Confirmation Information"),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _row("Preferred Language", order.confirmationPreferredLanguage??''),
+                    _row(Get.find<GlobalController>().t("Preferred Language"), order.confirmationPreferredLanguage??''),
                     _divider(),
-                    _row("Confirmation Date", order.confirmationDate??''),
+                    _row(Get.find<GlobalController>().t("Confirmation Date"), order.confirmationDate??''),
                     _divider(),
 
                     if (order.confirmationCallNote !=null) ...[
                       const SizedBox(height: 8),
-                      const Text(
-                        "Call Note",
+                       Text(
+                       Get.find<GlobalController>().t("Call Note"),
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
@@ -142,7 +142,7 @@ class OrderDetailsView extends StatelessWidget {
                           // TODO: open audio player
                         },
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text("Play Call Recording"),
+                        label:  Text(Get.find<GlobalController>().t("Play Call Recording")),
                       ),
                     ],
 
@@ -167,7 +167,7 @@ class OrderDetailsView extends StatelessWidget {
 
               /// ================= PRODUCTS =================
               _card(
-                title: "Products",
+                title: Get.find<GlobalController>().t("Products"),
                 child: Column(
                   children: order.orderDetails!.map((item) {
                     return Container(
@@ -188,11 +188,11 @@ class OrderDetailsView extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Text("Quantity: ${item.qty}"),
-                          Text("Price:  ${item.price}"),
+                          Text("${Get.find<GlobalController>().t("Quantity")}: ${item.qty}"),
+                          Text("${Get.find<GlobalController>().t("Price")}:  ${item.price}"),
                           const SizedBox(height: 6),
                           Text(
-                            "Subtotal:  ${item.subtotal}",
+                            "${Get.find<GlobalController>().t("Subtotal")}:  ${item.subtotal}",
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
 
@@ -209,8 +209,8 @@ class OrderDetailsView extends StatelessWidget {
                             onPressed: () {
                               // TODO refund logic
                             },
-                            child: const Text(
-                              "Request Refund",
+                            child:  Text(
+                              Get.find<GlobalController>().t("Request Refund"),
                               style: TextStyle(color: Colors.white),
                             ),
                           ),

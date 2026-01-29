@@ -15,9 +15,9 @@ class OrderService {
   final Dio _dio = Dio();
   final Server server = Server();
 
-  Future<OrderData?> getOrderHistoryData({int page = 1, String? search,}) async {
+  Future<OrderData?> getOrderHistoryData({int page = 1, String? search,String? country}) async {
     final response =
-    await server.getRequestToken(endPoint: ApiList.orderList!+'?page=${page.toString()}&search=${search ?? ''}');
+    await server.getRequestToken(endPoint: '${ApiList.orderList!}?page=${page.toString()}&search=${search ?? ''}&country=${country ?? ''}');
     if (response != null && response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       final model = OrderListModel.fromJson(jsonResponse);

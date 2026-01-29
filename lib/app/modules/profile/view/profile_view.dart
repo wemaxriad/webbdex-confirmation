@@ -4,11 +4,13 @@ import 'package:confirmation_agent_app/app/utils/common_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../helper/helper.dart';
+import '../../../services/api-list.dart';
 import '../../../utils/constant_colors.dart';
 import '../../../globalController/global_controller.dart';
 import '../controller/profile_controller.dart';
 import 'confirmation_agent_documents_view.dart';
 import 'shimmer/profile_shimmer_view.dart';
+import 'webview_page.dart';
 
 // Define a primary color based on the image (a bright red/pink)
 //const Color kPrimaryColor = Color(0xffFF3B5D);
@@ -117,18 +119,16 @@ class ProfileView extends StatelessWidget {
               },
             ),
             // --- Menu List (Functional Section) ---
-            _buildMenuItem(
-              title: Get.find<GlobalController>().t("My Orders"),
-              icon: Icons.receipt_long,
-              onTap: () {
-                Get.toNamed(AppRoutes.ORDER);
-              },
-            ),
+
             _buildMenuItem(
               title: Get.find<GlobalController>().t("Terms & Condition"),
               icon: Icons.article_outlined,
               onTap: () {
-                Get.toNamed(AppRoutes.TERMS_AND_CONDITIONS);
+                Get.to(() =>  WebViewPage(
+                  title: "Terms & Condition",
+                  url:  ApiList.termsCondition.toString(),
+                ));
+
               },
             ),
             _buildMenuItem(
@@ -136,7 +136,21 @@ class ProfileView extends StatelessWidget {
               icon: Icons.lock_outline,
               // Not the final item now, as Logout is next
               onTap: () {
-                Get.toNamed(AppRoutes.PRIVACY_POLICY);
+                Get.to(() =>  WebViewPage(
+                  title: "Privacy Policy",
+                  url:  ApiList.privacyPolicy.toString(),
+                ));
+              },
+            ),
+            _buildMenuItem(
+              title: Get.find<GlobalController>().t("FAQ"),
+              icon: Icons.question_mark_sharp,
+              // Not the final item now, as Logout is next
+              onTap: () {
+                Get.to(() =>  WebViewPage(
+                  title: "FAQ",
+                  url:  ApiList.privacyFaq.toString(),
+                ));
               },
             ),
 

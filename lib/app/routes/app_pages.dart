@@ -3,8 +3,6 @@ import 'package:confirmation_agent_app/app/modules/auth/reset_password/reset_pas
 import 'package:confirmation_agent_app/app/modules/auth/reset_password/reset_password_view.dart';
 import 'package:confirmation_agent_app/app/modules/auth/views/signin_view.dart';
 import 'package:confirmation_agent_app/app/modules/auth/views/signup_view.dart';
-import 'package:confirmation_agent_app/app/modules/order/bindings/order_binding.dart';
-import 'package:confirmation_agent_app/app/modules/order/view/order_view.dart';
 import 'package:confirmation_agent_app/app/modules/privacyPolicy/binding/privacy_policy_binding.dart';
 import 'package:confirmation_agent_app/app/modules/privacyPolicy/view/privacy_policy_view.dart';
 import 'package:confirmation_agent_app/app/modules/profile/binding/edit_profile_binding.dart';
@@ -42,11 +40,7 @@ class AppPages {
       page: () => SignupPage(),
       binding: AuthBinding(),
     ),
-    GetPage(
-      name: AppRoutes.ORDER,
-      page: () => const MyOrdersView(),
-      binding: MyOrdersBinding(),
-    ),
+
     GetPage(
       name: AppRoutes.EDIT_PROFILE,
       page: () => const EditProfileView(),

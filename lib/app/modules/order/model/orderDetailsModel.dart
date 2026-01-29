@@ -28,6 +28,8 @@ class Order {
   String? globalId;
   String? customerName;
   String? customerPhone;
+  String? customerPhoneCode;
+  String? customerCountryName;
   String? customerEmail;
   String? customerAddress;
   List<OrderItem>? orderDetails;
@@ -54,6 +56,8 @@ class Order {
         this.globalId,
         this.customerName,
         this.customerPhone,
+        this.customerPhoneCode,
+        this.customerCountryName,
         this.customerEmail,
         this.customerAddress,
         this.orderDetails,
@@ -83,6 +87,8 @@ class Order {
     globalId = json['global_id'];
     customerName = json['customer_name'];
     customerPhone = json['customer_phone'];
+    customerPhoneCode = json['customer_phone_code'];
+    customerCountryName = json['customer_country_name'];
     customerEmail = json['customer_email'];
     customerAddress = json['customer_address'];
     orderDetails = detailsMap.values
@@ -107,11 +113,13 @@ class Order {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = this.id;
     data['tenant_id'] = this.tenantId;
     data['global_id'] = this.globalId;
     data['customer_name'] = this.customerName;
+    data['customer_phone_code'] = this.customerPhoneCode;
+    data['customer_country_name'] = this.customerCountryName;
     data['customer_phone'] = this.customerPhone;
     data['customer_email'] = this.customerEmail;
     data['customer_address'] = this.customerAddress;

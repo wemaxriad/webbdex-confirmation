@@ -8,6 +8,7 @@ import '../../../routes/app_routes.dart';
 import '../../../services/api-list.dart';
 import '../../../services/server.dart';
 import '../../../services/user-service.dart';
+import '../../../services/firebase_messaging_service.dart';
 import '../model/CountryModel.dart';
 import '../model/LoginModel.dart';
 
@@ -81,6 +82,7 @@ class AuthController extends GetxController {
         isUser.value = true;
 
         Server.initToken(token: bearerToken);
+        updateFcmUnSubscribe();
         emailController.clear();
         passwordController.clear();
         isLoading(false);
@@ -128,6 +130,7 @@ class AuthController extends GetxController {
         isUser.value = true;
 
         Server.initToken(token: bearerToken);
+        updateFcmUnSubscribe();
         emailController.clear();
         passwordController.clear();
         isLoading(false);
@@ -248,6 +251,52 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       print(e);
+    }
+  }
+
+  /// Update FCM Token to Backend
+  /// This function is called after successful login/signup to register device token
+  updateFcmUnSubscribe() async {
+    try {
+      // Get FCM token from Firebase Messaging Service
+      final fcmService = FirebaseMessagingService();
+      String? fcmToken = fcmService.fcmToken;
+      
+      // If token is not available, try to get it
+      if (fcmToken == null || fcmToken.isEmpty) {
+        await fcmService.initialize();
+        fcmToken = fcmService.fcmToken;
+      }
+
+      // If still no token, return
+      if (fcmToken == null || fcmToken.isEmpty) {
+        debugPrint('FCM Token not available');
+        return;
+      }
+
+      Map body = {
+        "device_token": fcmToken,
+        "topic": null,
+      };
+      String jsonBody = json.encode(body);
+      
+      server.postRequestWithToken(endPoint: ApiList.fcmUnSubscribe, body: jsonBody).then((response) {
+        if (response != null && response.statusCode == 200) {
+          final jsonResponse = json.decode(response.body);
+          debugPrint('FCM Token updated successfully===========>');
+          debugPrint(jsonResponse.toString());
+        } else {
+          debugPrint('Failed to update FCM token: ${response?.statusCode}');
+          if (response != null) {
+            final jsonResponse = json.decode(response.body);
+            debugPrint('Error: ${jsonResponse.toString()}');
+          }
+        }
+      }).catchError((error) {
+        debugPrint('Error updating FCM token: $error');
+      });
+    } catch (e) {
+      debugPrint('Exception in updateFcmUnSubscribe: $e');
     }
   }
 

@@ -208,4 +208,6 @@ class GlobalController extends GetxController {
   }
 
 
+
+
 }

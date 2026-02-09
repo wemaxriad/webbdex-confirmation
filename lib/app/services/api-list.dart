@@ -34,5 +34,7 @@ class ApiList {
   static String? privacyPolicy = "${mainUrl}privacy-policy";
   static String? termsCondition = "${mainUrl}terms-and-condition";
   static String? privacyFaq = "${mainUrl}faq";
+  static String? fcmSubscribe = "${server!}fcm-subscribe";
+  static String? fcmUnSubscribe = "${server!}fcm-unsubscribe";
 
 }

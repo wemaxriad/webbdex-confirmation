@@ -7,10 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app/globalController/global_controller.dart';
 import 'app/modules/auth/controllers/auth_controller.dart';
 import 'app/routes/app_pages.dart';
+import 'app/services/firebase_messaging_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
+  // Initialize Firebase Messaging
+  await FirebaseMessagingService().initialize();
+  
   Get.put(AuthController(), permanent: true);
   Get.put(GlobalController(), permanent: true);
 

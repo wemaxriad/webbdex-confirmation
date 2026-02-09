@@ -5,9 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../globalController/global_controller.dart';
-import '../../../model/order_model.dart';
-import '../../order/controller/order_details_controller.dart';
-import '../../order/view/order_details_view.dart';
 import '../controller/order_call_controller.dart';
 import '../model/orderModel.dart';
 import 'order_call_screen_page.dart';
@@ -350,7 +347,7 @@ class OrderListView extends GetView<MyOrdersController> {
                       ],
                     ),
                   ),
-                  if (order.confirmationStatus != "approved")
+                  if (order.confirmationStatus != "approved" )
                     ElevatedButton.icon(
                       onPressed: () => order.confirmationStatus == 'pending'
                           ? showChangeStatusAssignDialog(order)
@@ -411,7 +408,7 @@ class OrderListView extends GetView<MyOrdersController> {
               const SizedBox(height: 10),
 
               /// 📞 Phone + Call Button (only if not pending)
-              if (order.confirmationStatus.toString() != 'approved')
+              if (order.confirmationStatus.toString() != 'approved' && order.confirmationStatus.toString() != 'pending')
                 Column(
                   children: [
                     Row(

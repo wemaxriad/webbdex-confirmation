@@ -49,15 +49,22 @@ class CallController extends GetxController {
 
             _stopTimer();
 
-            // ✅ Close call screen FIRST
-            if (Get.isOverlaysOpen) {
+            // Close call screen safely
+            if (Get.isOverlaysOpen ?? false) {
               Get.back();
             }
 
-            // ✅ THEN show confirmation popup
             Future.delayed(const Duration(milliseconds: 300), () {
-              Get.find<MyOrdersController>()
-                  .showChangeStatusConfirmDialog(orderData.value!);
+              try {
+                if (Get.isRegistered<MyOrdersController>() &&
+                    orderData.value != null) {
+
+                  Get.find<MyOrdersController>()
+                      .showChangeStatusConfirmDialog(orderData.value!);
+                }
+              } catch (e) {
+                print("Dialog Error: $e");
+              }
             });
           }
         });
@@ -80,9 +87,7 @@ class CallController extends GetxController {
   Future<bool> _checkPermissions() async {
     final mic = await Permission.microphone.request();
     final phone = await Permission.phone.request();
-    final readNumbers = await Permission.phone.request(); // or READ_PHONE_NUMBERS if available
-
-    return mic.isGranted && phone.isGranted && readNumbers.isGranted;
+    return mic.isGranted && phone.isGranted;
   }
 
   Future<void> registerPhoneAccountAndPrompt() async {

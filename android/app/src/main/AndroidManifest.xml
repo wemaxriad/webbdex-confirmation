@@ -29,6 +29,8 @@
     <application
         android:label="WebbyFirm Agent"
         android:name="${applicationName}"
+        android:usesCleartextTraffic="true"
+        android:exported="true"
         android:icon="@mipmap/ic_launcher">
 
         <activity

@@ -30,7 +30,7 @@ class ApiList {
   static String? logout = "${server!}sign-out";
   static String? refreshToken = "${server!}refresh";
   static String? orderCallToken = "${server!}/confirmation-agent/order-call/token";
-  static String? deleteAccount = '${server!}account/delete';
+  static String? deleteAccount = '${server!}/account/delete';
   static String? privacyPolicy = "${mainUrl}privacy-policy";
   static String? termsCondition = "${mainUrl}terms-and-condition";
   static String? privacyFaq = "${mainUrl}faq";

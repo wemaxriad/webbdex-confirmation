@@ -27,7 +27,7 @@
         </intent>
     </queries>
     <application
-        android:label="WebbyFirm Agent"
+        android:label="WebbyFrim"
         android:name="${applicationName}"
         android:usesCleartextTraffic="true"
         android:exported="true"

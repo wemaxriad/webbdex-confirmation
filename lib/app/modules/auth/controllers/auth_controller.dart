@@ -242,15 +242,70 @@ class AuthController extends GetxController {
     Get.offNamed(AppRoutes.SIGNIN);
   }
 
-  deleteAccount() async {
+  /// Permanently deletes the user account on the server, then clears local session.
+  /// Required for App Store Guideline 5.1.1(v) — in-app account deletion.
+  Future<void> deleteAccount() async {
+    final endPoint = ApiList.deleteAccount;
+    if (endPoint == null || endPoint.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Account deletion is not available.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    Get.dialog(
+      const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(28),
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
     try {
-      var response = await server.deleteRequest(endPoint: ApiList.deleteAccount);
-      print(response.statusCode);
-      if (response != null && response.statusCode == 200) {
-        Get.offNamed(AppRoutes.SIGNIN);
+      final response = await server.deleteRequest(endPoint: endPoint);
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        await userLogout();
+      } else {
+        var msg = 'Could not delete your account. Please try again.';
+        if (response != null) {
+          try {
+            final jsonResponse = json.decode(response.body);
+            if (jsonResponse['message'] != null) {
+              msg = jsonResponse['message'].toString();
+            }
+          } catch (_) {}
+        }
+        Get.snackbar(
+          'Error',
+          msg,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
-      print(e);
+      debugPrint('deleteAccount: $e');
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      Get.snackbar(
+        'Error',
+        'Something went wrong. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 

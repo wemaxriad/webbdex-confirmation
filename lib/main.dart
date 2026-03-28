@@ -11,22 +11,23 @@ import 'app/services/firebase_messaging_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  
+  // await Firebase.initializeApp();
+
   // Initialize Firebase Messaging
-  await FirebaseMessagingService().initialize();
-  
+  // await FirebaseMessagingService().initialize();
+
   Get.put(AuthController(), permanent: true);
   Get.put(GlobalController(), permanent: true);
 
- var  prefs = await SharedPreferences.getInstance();
- var lanKey = prefs.getString('langKey');
+  var prefs = await SharedPreferences.getInstance();
+  var lanKey = prefs.getString('langKey');
   if (lanKey != null) {
-     Get.updateLocale(Locale(lanKey));
+    Get.updateLocale(Locale(lanKey));
   } else {
     Get.updateLocale(Locale('en'));
   }
-  Get.find<GlobalController>().selectedLang.value = prefs.getString('langKey') ?? 'en';
+  Get.find<GlobalController>().selectedLang.value =
+      prefs.getString('langKey') ?? 'en';
   runApp(const MyApp());
 }
 
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Confirmation Agent',
+      title: 'WebbyFrim',
 
       // ======== THEME SETTINGS =========
       theme: ThemeData(

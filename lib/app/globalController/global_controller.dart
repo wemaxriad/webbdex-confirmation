@@ -13,7 +13,7 @@ class GlobalController extends GetxController {
 
   Server server = Server();
   UserService userService = UserService();
-  var businessName = 'Confirmation App'.obs;
+  var businessName = 'WebbyFrim'.obs;
   var userImage = 'assets/images/user.png'.obs;
 
   RxList<String> countries = <String>[].obs;

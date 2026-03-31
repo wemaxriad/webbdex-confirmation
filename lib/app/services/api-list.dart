@@ -1,5 +1,5 @@
 class ApiList {
-  // static String? mainUrl = "http://192.168.0.107/webbydex/";
+  // static String? mainUrl = "http://192.168.0.102/webbydex/";
   static String? mainUrl = "https://webbydex.com/";
   static String? apiUrl = "webbydex.com";
   static String? mapGoogleApiKey = "";
@@ -34,7 +34,7 @@ class ApiList {
   static String? privacyPolicy = "${mainUrl}privacy-policy";
   static String? termsCondition = "${mainUrl}terms-and-condition";
   static String? privacyFaq = "${mainUrl}faq";
-  static String? fcmSubscribe = "${server!}fcm-subscribe";
-  static String? fcmUnSubscribe = "${server!}fcm-unsubscribe";
+  static String? fcmTokenSave = "${server!}/confirmation-agent/fcm-token/save";
+  static String? fcmTokenDelete = "${server!}/confirmation-agent/fcm-token/delete";
 
 }

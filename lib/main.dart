@@ -11,10 +11,10 @@ import 'app/services/firebase_messaging_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+  await Firebase.initializeApp();
 
-  // Initialize Firebase Messaging
-  // await FirebaseMessagingService().initialize();
+  // Initialize Firebase Messaging on app start.
+  await FirebaseMessagingService().initialize();
 
   Get.put(AuthController(), permanent: true);
   Get.put(GlobalController(), permanent: true);

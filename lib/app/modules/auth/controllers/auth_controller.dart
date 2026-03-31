@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,7 @@ class AuthController extends GetxController {
         isUser.value = true;
 
         Server.initToken(token: bearerToken);
-        updateFcmUnSubscribe();
+        registerFcmToken();
         emailController.clear();
         passwordController.clear();
         isLoading(false);
@@ -130,7 +131,7 @@ class AuthController extends GetxController {
         isUser.value = true;
 
         Server.initToken(token: bearerToken);
-        updateFcmUnSubscribe();
+        registerFcmToken();
         emailController.clear();
         passwordController.clear();
         isLoading(false);
@@ -237,6 +238,7 @@ class AuthController extends GetxController {
 
 
   userLogout() async {
+    await unregisterFcmToken();
     await userService.removeSharedPreferenceData();
     isUser.value = false;
     Get.offNamed(AppRoutes.SIGNIN);
@@ -309,9 +311,8 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Update FCM Token to Backend
-  /// This function is called after successful login/signup to register device token
-  updateFcmUnSubscribe() async {
+  /// Register FCM token to backend after login/signup.
+  registerFcmToken() async {
     try {
       // Get FCM token from Firebase Messaging Service
       final fcmService = FirebaseMessagingService();
@@ -331,27 +332,48 @@ class AuthController extends GetxController {
 
       Map body = {
         "device_token": fcmToken,
-        "topic": null,
+        "platform": Platform.isAndroid ? "android" : "ios",
+        "user_type": "confirmation",
       };
       String jsonBody = json.encode(body);
       
-      server.postRequestWithToken(endPoint: ApiList.fcmUnSubscribe, body: jsonBody).then((response) {
+      server.postRequestWithToken(endPoint: ApiList.fcmTokenSave, body: jsonBody).then((response) {
         if (response != null && response.statusCode == 200) {
           final jsonResponse = json.decode(response.body);
-          debugPrint('FCM Token updated successfully===========>');
+          debugPrint('FCM Token registered successfully');
           debugPrint(jsonResponse.toString());
         } else {
-          debugPrint('Failed to update FCM token: ${response?.statusCode}');
+          debugPrint('Failed to register FCM token: ${response?.statusCode}');
           if (response != null) {
             final jsonResponse = json.decode(response.body);
             debugPrint('Error: ${jsonResponse.toString()}');
           }
         }
       }).catchError((error) {
-        debugPrint('Error updating FCM token: $error');
+        debugPrint('Error registering FCM token: $error');
       });
     } catch (e) {
-      debugPrint('Exception in updateFcmUnSubscribe: $e');
+      debugPrint('Exception in registerFcmToken: $e');
+    }
+  }
+
+  /// Deactivate token on backend before local logout.
+  unregisterFcmToken() async {
+    try {
+      final fcmService = FirebaseMessagingService();
+      String? fcmToken = fcmService.fcmToken;
+
+      if (fcmToken == null || fcmToken.isEmpty) {
+        await fcmService.initialize();
+        fcmToken = fcmService.fcmToken;
+      }
+
+      if (fcmToken == null || fcmToken.isEmpty) return;
+
+      final jsonBody = json.encode({"device_token": fcmToken});
+      await server.postRequestWithToken(endPoint: ApiList.fcmTokenDelete, body: jsonBody);
+    } catch (_) {
+      // Keep logout resilient even if token cleanup fails.
     }
   }
 

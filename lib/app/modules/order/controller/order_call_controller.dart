@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:twilio_voice/twilio_voice.dart';
@@ -86,6 +87,12 @@ class CallController extends GetxController {
 
   Future<bool> _checkPermissions() async {
     final mic = await Permission.microphone.request();
+
+    // iOS does not expose runtime "phone" permission like Android.
+    if (Platform.isIOS) {
+      return mic.isGranted;
+    }
+
     final phone = await Permission.phone.request();
     return mic.isGranted && phone.isGranted;
   }
@@ -124,7 +131,7 @@ class CallController extends GetxController {
       if (!await _checkPermissions()) return;
 
       final userId = await _userService.getUserId();
-      final fcmToken = await getFcmToken();
+      final fcmToken = Platform.isAndroid ? await getFcmToken() : null;
 
       // 2️⃣ Fetch Twilio token
       final response = await http.post(
@@ -142,22 +149,23 @@ class CallController extends GetxController {
         deviceToken: fcmToken,
       );
 
-      // 4️⃣ Register Phone Account & wait
-      final registered = await TwilioVoice.instance.registerPhoneAccount();
-      if (!registered!) {
-        Get.snackbar("Error", "Phone account registration failed");
-        return;
-      }
+      // 4️⃣ Android only: register and verify Phone Account.
+      if (Platform.isAndroid) {
+        final registered = await TwilioVoice.instance.registerPhoneAccount();
+        if (registered != true) {
+          Get.snackbar("Error", "Phone account registration failed");
+          return;
+        }
 
-      // 5️⃣ Ensure phone account is enabled
-      final enabled = await TwilioVoice.instance.isPhoneAccountEnabled();
-      if (!enabled) {
-        await TwilioVoice.instance.openPhoneAccountSettings();
-        Get.snackbar(
-          "Enable Phone Account",
-          "Please enable the phone account to make calls",
-        );
-        return;
+        final enabled = await TwilioVoice.instance.isPhoneAccountEnabled();
+        if (!enabled) {
+          await TwilioVoice.instance.openPhoneAccountSettings();
+          Get.snackbar(
+            "Enable Phone Account",
+            "Please enable the phone account to make calls",
+          );
+          return;
+        }
       }
       // print(formatCountryPhoneNumber(customerPhone));
       // 6️⃣ Place call (ensure non-null 'to' and 'from')

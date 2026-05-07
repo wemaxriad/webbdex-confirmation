@@ -33,25 +33,31 @@ class OrderListView extends GetView<MyOrdersController> {
                 Column(
                   children: [
                     Obx(
-                          () => Container(
-                            margin: const EdgeInsets.fromLTRB(12, 8, 12, 5),
-                            padding: const EdgeInsets.only(left: 10,bottom:5,top:5,right: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                      () => Container(
+                        margin: const EdgeInsets.fromLTRB(12, 8, 12, 5),
+                        padding: const EdgeInsets.only(
+                          left: 10,
+                          bottom: 5,
+                          top: 5,
+                          right: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                            child: DropdownButtonHideUnderline(
+                          ],
+                        ),
+                        child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            value: globalController.countries.contains(
-                              controller.selectedCountry.value,
-                            )
+                            value:
+                                globalController.countries.contains(
+                                  controller.selectedCountry.value,
+                                )
                                 ? controller.selectedCountry.value
                                 : globalController.countries.first,
                             isExpanded: true,
@@ -65,36 +71,47 @@ class OrderListView extends GetView<MyOrdersController> {
                             },
                             items: globalController.countries
                                 .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value == globalController.t('Select Country')
-                                      ? value
-                                      : globalController.t(value),
-                                  style: TextStyle(
-                                    color: value == globalController.t('Select Country')
-                                        ? Colors.grey
-                                        : Colors.black,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value ==
+                                              globalController.t(
+                                                'Select Country',
+                                              )
+                                          ? value
+                                          : globalController.t(value),
+                                      style: TextStyle(
+                                        color:
+                                            value ==
+                                                globalController.t(
+                                                  'Select Country',
+                                                )
+                                            ? Colors.grey
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                  );
+                                })
+                                .toList(),
                           ),
                         ),
                       ),
                     ),
                     tabSearchBar(
                       controller: controller.pendingSearchCtrl,
-                      onSearch: () => controller.getOrderHistoryData(reset: true),
+                      onSearch: () =>
+                          controller.getOrderHistoryData(reset: true),
                       hintText: globalController.t("Customer name phone"),
                     ),
                     Expanded(
-                      child: Obx(() => ordersList(
-                        controller.orderList,
-                        controller.isMoreLoading.value,
-                            () => controller.getOrderHistoryData(),
-                        emptyText: globalController.t("No Order List"),
-                      )),
+                      child: Obx(
+                        () => ordersList(
+                          controller.orderList,
+                          controller.isMoreLoading.value,
+                          () => controller.getOrderHistoryData(),
+                          emptyText: globalController.t("No Order List"),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -104,16 +121,19 @@ class OrderListView extends GetView<MyOrdersController> {
                   children: [
                     tabSearchBar(
                       controller: controller.assignSearchCtrl,
-                      onSearch: () => controller.getAssignOrderHistoryData(reset: true),
+                      onSearch: () =>
+                          controller.getAssignOrderHistoryData(reset: true),
                       hintText: globalController.t("Customer name phone"),
                     ),
                     Expanded(
-                      child: Obx(() => assignOrdersList(
-                        controller.assignOrderList,
-                        controller.assignOrderIsMoreLoading.value,
-                            () => controller.getAssignOrderHistoryData(),
-                        emptyText: globalController.t("No Order List"),
-                      )),
+                      child: Obx(
+                        () => assignOrdersList(
+                          controller.assignOrderList,
+                          controller.assignOrderIsMoreLoading.value,
+                          () => controller.getAssignOrderHistoryData(),
+                          emptyText: globalController.t("No Order List"),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -123,16 +143,19 @@ class OrderListView extends GetView<MyOrdersController> {
                   children: [
                     tabSearchBar(
                       controller: controller.confirmedSearchCtrl,
-                      onSearch: () => controller.getConfirmedOrderHistoryData(reset: true),
+                      onSearch: () =>
+                          controller.getConfirmedOrderHistoryData(reset: true),
                       hintText: globalController.t("Customer name phone"),
                     ),
                     Expanded(
-                      child: Obx(() => confirmOrdersList(
-                        controller.confirmedOrderList,
-                        controller.confirmedOrderIsMoreLoading.value,
-                            () => controller.getConfirmedOrderHistoryData(),
-                        emptyText: globalController.t("No Order List"),
-                      )),
+                      child: Obx(
+                        () => confirmOrdersList(
+                          controller.confirmedOrderList,
+                          controller.confirmedOrderIsMoreLoading.value,
+                          () => controller.getConfirmedOrderHistoryData(),
+                          emptyText: globalController.t("No Order List"),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -173,28 +196,31 @@ class OrderListView extends GetView<MyOrdersController> {
               textInputAction: TextInputAction.search,
               onSubmitted: (_) => onSearch(),
               decoration: InputDecoration(
-                hintText: hintText ?? globalController.t('Order ID customer name phone'),
+                hintText:
+                    hintText ??
+                    globalController.t('Order ID customer name phone'),
                 hintStyle: TextStyle(color: Colors.grey.shade500),
                 prefixIcon: const Icon(Icons.search, size: 22),
                 suffixIcon: controller.text.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  onPressed: () {
-                    controller.clear();
-                    onSearch();
-                  },
-                )
+                        icon: const Icon(Icons.close, size: 18),
+                        onPressed: () {
+                          controller.clear();
+                          onSearch();
+                        },
+                      )
                     : null,
                 filled: true,
                 fillColor: Colors.grey.shade100,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 border: OutlineInputBorder(
                   borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(10), topLeft: Radius.circular(10)),
+                    bottomLeft: Radius.circular(10),
+                    topLeft: Radius.circular(10),
+                  ),
                   borderSide: BorderSide.none,
                 ),
               ),
-
             ),
           ),
 
@@ -205,23 +231,22 @@ class OrderListView extends GetView<MyOrdersController> {
             height: 53,
             child: ElevatedButton.icon(
               onPressed: onSearch,
-              icon: const Icon(
-                Icons.search,
-                size: 18,
-                color: Colors.white,
-              ),
+              icon: const Icon(Icons.search, size: 18, color: Colors.white),
               label: Text(
                 Get.find<GlobalController>().t('Search'),
                 style: const TextStyle(
-                    fontWeight: FontWeight.w600, color: Colors.white),
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
-                      bottomRight: Radius.circular(10),
-                      topRight: Radius.circular(10)),
+                    bottomRight: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
                 ),
                 elevation: 2,
               ),
@@ -233,11 +258,11 @@ class OrderListView extends GetView<MyOrdersController> {
   }
 
   Widget ordersList(
-      List<OrderList> orderList,
-      bool isLoading,
-      VoidCallback loadMore, {
-        String emptyText = '',
-      }) {
+    List<OrderList> orderList,
+    bool isLoading,
+    VoidCallback loadMore, {
+    String emptyText = '',
+  }) {
     return RefreshIndicator(
       onRefresh: controller.refreshOrders,
       child: Obx(() {
@@ -284,26 +309,21 @@ class OrderListView extends GetView<MyOrdersController> {
     );
   }
 
-// assignOrdersList and confirmOrdersList can simply reuse ordersList with their own params
+  // assignOrdersList and confirmOrdersList can simply reuse ordersList with their own params
 
   Widget assignOrdersList(
-      List<OrderList> orderList,
-      bool isLoading,
-      VoidCallback loadMore, {
-        String emptyText = '',
-      }) =>
-      ordersList(orderList, isLoading, loadMore, emptyText: emptyText);
+    List<OrderList> orderList,
+    bool isLoading,
+    VoidCallback loadMore, {
+    String emptyText = '',
+  }) => ordersList(orderList, isLoading, loadMore, emptyText: emptyText);
 
   Widget confirmOrdersList(
-      List<OrderList> orderList,
-      bool isLoading,
-      VoidCallback loadMore, {
-        String emptyText = '',
-      }) =>
-      ordersList(orderList, isLoading, loadMore, emptyText: emptyText);
-
-
-
+    List<OrderList> orderList,
+    bool isLoading,
+    VoidCallback loadMore, {
+    String emptyText = '',
+  }) => ordersList(orderList, isLoading, loadMore, emptyText: emptyText);
 
   Widget _OrderCard(OrderList order, BuildContext context) {
     final globalController = Get.find<GlobalController>();
@@ -315,7 +335,10 @@ class OrderListView extends GetView<MyOrdersController> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          controller.getConfirmedOrderDetailsData(order.id.toString(), order.tenantId.toString());
+          controller.getConfirmedOrderDetailsData(
+            order.id.toString(),
+            order.tenantId.toString(),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
@@ -347,7 +370,7 @@ class OrderListView extends GetView<MyOrdersController> {
                       ],
                     ),
                   ),
-                  if (order.confirmationStatus != "approved" )
+                  if (order.confirmationStatus != "approved")
                     ElevatedButton.icon(
                       onPressed: () => order.confirmationStatus == 'pending'
                           ? showChangeStatusAssignDialog(order)
@@ -378,10 +401,11 @@ class OrderListView extends GetView<MyOrdersController> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    )
+                    ),
                 ],
               ),
               const Divider(height: 24),
+
               /// 👤 Customer Name + Date
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,10 +421,7 @@ class OrderListView extends GetView<MyOrdersController> {
                   ),
                   Text(
                     order.createdAt ?? '',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                 ],
               ),
@@ -408,7 +429,8 @@ class OrderListView extends GetView<MyOrdersController> {
               const SizedBox(height: 10),
 
               /// 📞 Phone + Call Button (only if not pending)
-              if (order.confirmationStatus.toString() != 'approved' && order.confirmationStatus.toString() != 'pending')
+              if (order.confirmationStatus.toString() != 'approved' &&
+                  order.confirmationStatus.toString() != 'pending')
                 Column(
                   children: [
                     Row(
@@ -428,7 +450,8 @@ class OrderListView extends GetView<MyOrdersController> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            order.customerPhone ?? globalController.t('Not Available'),
+                            order.customerPhone ??
+                                globalController.t('Not Available'),
                             style: const TextStyle(fontSize: 13),
                           ),
                         ),
@@ -437,17 +460,28 @@ class OrderListView extends GetView<MyOrdersController> {
                           child: ElevatedButton.icon(
                             onPressed: () {
                               final callCtrl = Get.put(CallController());
-                              Get.to(() => const OrderCallScreenPage());
-                              callCtrl.makeCall(order, order.customerPhone ?? '');
+                              callCtrl.makeCall(
+                                order,
+                                order.customerPhone ?? '',
+                              );
                             },
-                            icon: const Icon(Icons.call, size: 16, color: Colors.white),
+                            icon: const Icon(
+                              Icons.call,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                             label: Text(
                               globalController.t('Call'),
-                              style: const TextStyle(fontSize: 12, color: Colors.white),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                              ),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xff39C367),
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -487,17 +521,14 @@ class OrderListView extends GetView<MyOrdersController> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              order.customerEmail ?? globalController.t('Not Available'),
+                              order.customerEmail ??
+                                  globalController.t('Not Available'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 13),
                             ),
                           ),
-                          const Icon(
-                            Icons.copy,
-                            size: 14,
-                            color: Colors.grey,
-                          ),
+                          const Icon(Icons.copy, size: 14, color: Colors.grey),
                         ],
                       ),
                     ),
@@ -536,15 +567,11 @@ class OrderListView extends GetView<MyOrdersController> {
     );
   }
 
-
   /// 📞 Open phone dial pad
   Future<void> openDialPad(String phone) async {
     final Uri uri = Uri.parse("tel:$phone");
 
-    if (!await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    )) {
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       Get.snackbar("Error", "Could not open dial pad");
     }
   }
@@ -558,13 +585,13 @@ class OrderListView extends GetView<MyOrdersController> {
       case "Approved":
         bgColor = Colors.green;
         break;
-        case "Assign":
+      case "Assign":
         bgColor = Colors.orange;
         break;
-        case "De-Assign":
+      case "De-Assign":
         bgColor = Colors.indigoAccent;
         break;
-        case "Canceled":
+      case "Canceled":
         bgColor = Colors.red;
         break;
       case "Pending":
@@ -594,7 +621,9 @@ class OrderListView extends GetView<MyOrdersController> {
   void showChangeStatusConfirmDialog(OrderList order) {
     final globalController = Get.find<GlobalController>();
 
-    controller.selectedStatus.value = globalController.t('Select Status'); // localize default value
+    controller.selectedStatus.value = globalController.t(
+      'Select Status',
+    ); // localize default value
     controller.statusNotes.value = '';
     controller.clearAttachment(); // Clear previous attachments
 
@@ -636,7 +665,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 ),
                 const SizedBox(height: 5),
                 Obx(
-                      () => Container(
+                  () => Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade300),
@@ -644,9 +673,10 @@ class OrderListView extends GetView<MyOrdersController> {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: controller.statusOptions.contains(
-                          controller.selectedStatus.value,
-                        )
+                        value:
+                            controller.statusOptions.contains(
+                              controller.selectedStatus.value,
+                            )
                             ? controller.selectedStatus.value
                             : controller.statusOptions.first,
                         isExpanded: true,
@@ -660,20 +690,23 @@ class OrderListView extends GetView<MyOrdersController> {
                         },
                         items: controller.statusOptions
                             .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value == globalController.t('Select Status')
-                                  ? value
-                                  : globalController.t(value),
-                              style: TextStyle(
-                                color: value == globalController.t('Select Status')
-                                    ? Colors.grey
-                                    : Colors.black,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value == globalController.t('Select Status')
+                                      ? value
+                                      : globalController.t(value),
+                                  style: TextStyle(
+                                    color:
+                                        value ==
+                                            globalController.t('Select Status')
+                                        ? Colors.grey
+                                        : Colors.black,
+                                  ),
+                                ),
+                              );
+                            })
+                            .toList(),
                       ),
                     ),
                   ),
@@ -828,17 +861,18 @@ class OrderListView extends GetView<MyOrdersController> {
                     const SizedBox(width: 15),
                     Expanded(
                       child: Obx(
-                            () => SizedBox(
+                        () => SizedBox(
                           height: 45,
                           child: ElevatedButton(
-                            onPressed: controller.selectedStatus.value ==
-                                globalController.t('Select Status')
+                            onPressed:
+                                controller.selectedStatus.value ==
+                                    globalController.t('Select Status')
                                 ? null
                                 : () => controller.submitStatusChange(
-                              order.id.toString(),
-                              order.tenantId.toString(),
-                              controller.selectedStatus.value,
-                            ),
+                                    order.id.toString(),
+                                    order.tenantId.toString(),
+                                    controller.selectedStatus.value,
+                                  ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
                               shape: RoundedRectangleBorder(
@@ -866,9 +900,7 @@ class OrderListView extends GetView<MyOrdersController> {
     );
   }
 
-
   void showChangeStatusAssignDialog(OrderList order) {
-
     final globalController = Get.find<GlobalController>();
     Get.dialog(
       Dialog(
@@ -908,7 +940,7 @@ class OrderListView extends GetView<MyOrdersController> {
                 ),
                 const SizedBox(height: 5),
                 Obx(
-                      () => Container(
+                  () => Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade300),
@@ -916,9 +948,10 @@ class OrderListView extends GetView<MyOrdersController> {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: controller.assignStatusOptions.contains(
-                          controller.assignSelectedStatus.value,
-                        )
+                        value:
+                            controller.assignStatusOptions.contains(
+                              controller.assignSelectedStatus.value,
+                            )
                             ? controller.assignSelectedStatus.value
                             : controller.assignStatusOptions.first,
                         isExpanded: true,
@@ -928,20 +961,20 @@ class OrderListView extends GetView<MyOrdersController> {
                           fontSize: 16,
                         ),
                         onChanged: (String? newValue) {
-                          controller.assignSelectedStatus.value = newValue ?? '';
+                          controller.assignSelectedStatus.value =
+                              newValue ?? '';
                         },
                         items: controller.assignStatusOptions
                             .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              globalController.t(value),
-                              style: const TextStyle(
-                                color: Colors.black,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  globalController.t(value),
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              );
+                            })
+                            .toList(),
                       ),
                     ),
                   ),
@@ -1006,7 +1039,4 @@ class OrderListView extends GetView<MyOrdersController> {
       ),
     );
   }
-
-
-
 }

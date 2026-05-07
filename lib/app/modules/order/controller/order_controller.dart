@@ -8,8 +8,10 @@ import '../../../services/user-service.dart';
 import '../../../utils/constant_colors.dart';
 import '../model/orderDetailsModel.dart';
 import '../model/orderModel.dart';
+import '../order_call_route.dart';
 import '../service/order_service.dart';
 import '../view/order_details_view.dart';
+import 'order_call_controller.dart';
 
 class MyOrdersController extends GetxController {
   // --- Change Status Dialog State ---
@@ -259,6 +261,30 @@ class MyOrdersController extends GetxController {
     attachmentAudioName.value = null;
   }
 
+  bool _isTopRouteOrderCallScreen() {
+    return Get.routing.current == kOrderCallScreenRoute ||
+        Get.currentRoute == kOrderCallScreenRoute;
+  }
+
+  /// After VoIP ends, clears the dialog, pops [OrderCallScreenPage] when still on stack,
+  /// disposes [CallController] so the next call starts clean, optionally reloads tabs.
+  void _closePostCallChangeStatusUi({required bool reloadOrderLists}) {
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+    Future.microtask(() {
+      if (_isTopRouteOrderCallScreen()) {
+        Get.back();
+      }
+      if (Get.isRegistered<CallController>()) {
+        Get.delete<CallController>(force: true);
+      }
+      if (reloadOrderLists) {
+        refreshOrders();
+      }
+    });
+  }
+
   Future<void> submitStatusChange(String orderId,tenantId,status) async {
     if(status != 'Assign Order') {
       if (selectedStatus.value == 'Select Status') return;
@@ -330,7 +356,9 @@ class MyOrdersController extends GetxController {
                         color: primaryColor,
                         size: 30,
                       ),
-                      onPressed: () => Get.back(),
+                      onPressed: () => _closePostCallChangeStatusUi(
+                        reloadOrderLists: true,
+                      ),
                     ),
                   ],
                 ),
@@ -422,16 +450,9 @@ class MyOrdersController extends GetxController {
                       child: SizedBox(
                         height: 45,
                         child: ElevatedButton(
-                          onPressed: () {
-                            if (Get.isDialogOpen ?? false) {
-                              Get.back();
-                            }
-
-                            // 2️⃣ Close call screen
-                            if (Get.previousRoute.isNotEmpty) {
-                              Get.back();
-                            }
-                          } ,
+                          onPressed: () => _closePostCallChangeStatusUi(
+                            reloadOrderLists: true,
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
@@ -463,15 +484,19 @@ class MyOrdersController extends GetxController {
                                 selectedStatus.value,
                               );
 
-                              // 1️⃣ Close popup
-                              if (Get.isDialogOpen ?? false) {
-                                Get.back();
-                              }
+                              // submit closes dialog & refreshes lists on success.
+                              Future.microtask(() {
+                                final stillOnDialog =
+                                    Get.isDialogOpen ?? false;
+                                if (stillOnDialog) return;
 
-                              // 2️⃣ Close call screen
-                              if (Get.previousRoute.isNotEmpty) {
-                                Get.back();
-                              }
+                                if (_isTopRouteOrderCallScreen()) {
+                                  Get.back();
+                                }
+                                if (Get.isRegistered<CallController>()) {
+                                  Get.delete<CallController>(force: true);
+                                }
+                              });
                             },
 
                             style: ElevatedButton.styleFrom(

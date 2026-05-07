@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:twilio_voice/twilio_voice.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-
 import '../../../helper/helper.dart';
 import '../../../services/api-list.dart';
 import '../../../services/user-service.dart';
 import '../model/orderModel.dart';
+import '../order_call_route.dart';
+import '../view/order_call_screen_page.dart';
 import 'order_controller.dart';
 
 class CallController extends GetxController {
@@ -32,52 +36,44 @@ class CallController extends GetxController {
   }
 
   void _listenToEvents() {
-    _callSubscription =
-        TwilioVoice.instance.callEventsListener.listen((event) {
+    _callSubscription = TwilioVoice.instance.callEventsListener.listen((event) {
+      callStatus.value = event.toString().split('.').last.capitalizeFirst!;
 
-          callStatus.value =
-          event.toString().split('.').last.capitalizeFirst!;
+      if (event == CallEvent.connected) {
+        _startTimer();
+      }
 
-          if (event == CallEvent.connected) {
-            _startTimer();
+      if (event == CallEvent.callEnded ||
+          event == CallEvent.declined ||
+          event == CallEvent.missedCall) {
+        _stopTimer();
 
-          }
+        // Close call screen safely
+        if (Get.isOverlaysOpen ?? false) {
+          Get.back();
+        }
 
-
-          if (event == CallEvent.callEnded ||
-              event == CallEvent.declined ||
-              event == CallEvent.missedCall) {
-
-            _stopTimer();
-
-            // Close call screen safely
-            if (Get.isOverlaysOpen ?? false) {
-              Get.back();
+        Future.delayed(const Duration(milliseconds: 300), () {
+          try {
+            if (Get.isRegistered<MyOrdersController>() &&
+                orderData.value != null) {
+              Get.find<MyOrdersController>().showChangeStatusConfirmDialog(
+                orderData.value!,
+              );
             }
-
-            Future.delayed(const Duration(milliseconds: 300), () {
-              try {
-                if (Get.isRegistered<MyOrdersController>() &&
-                    orderData.value != null) {
-
-                  Get.find<MyOrdersController>()
-                      .showChangeStatusConfirmDialog(orderData.value!);
-                }
-              } catch (e) {
-                print("Dialog Error: $e");
-              }
-            });
+          } catch (e) {
+            print("Dialog Error: $e");
           }
         });
+      }
+    });
   }
-
 
   /// Initial Registration with Token
   Future<void> initTwilio(String accessToken, String? fcmToken) async {
-    // Android requires FCM token; iOS handles device token internally
-    await TwilioVoice.instance.setTokens(
-        accessToken: accessToken,
-        deviceToken: fcmToken
+    await _setTwilioTokens(
+      accessToken: accessToken,
+      androidFcmToken: Platform.isAndroid ? fcmToken : null,
     );
   }
 
@@ -86,15 +82,105 @@ class CallController extends GetxController {
   }
 
   Future<bool> _checkPermissions() async {
-    final mic = await Permission.microphone.request();
-
-    // iOS does not expose runtime "phone" permission like Android.
+    // iOS: use Twilio's native AVAudioSession APIs. `permission_handler`'s microphone
+    // channel is a no-op / always-denied unless PERMISSION_MICROPHONE is set in Podfile.
     if (Platform.isIOS) {
-      return mic.isGranted;
+      if (await TwilioVoice.instance.hasMicAccess()) return true;
+      final allowed = await TwilioVoice.instance.requestMicAccess();
+      if (allowed == true) return true;
+
+      Get.snackbar(
+        'Microphone needed',
+        'Allow microphone access to place calls. Tap Settings to turn it on.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 5),
+        mainButton: TextButton(
+          onPressed: () => openAppSettings(),
+          child: const Text('Settings'),
+        ),
+      );
+      return false;
+    }
+
+    final mic = await Permission.microphone.request();
+    if (!mic.isGranted) {
+      Get.snackbar(
+        'Microphone needed',
+        mic.isPermanentlyDenied
+            ? 'Microphone is off. Open Settings to allow it.'
+            : 'Microphone permission is required to call.',
+        snackPosition: SnackPosition.BOTTOM,
+        mainButton: TextButton(
+          onPressed: () => openAppSettings(),
+          child: const Text('Settings'),
+        ),
+      );
+      return false;
     }
 
     final phone = await Permission.phone.request();
-    return mic.isGranted && phone.isGranted;
+    if (!phone.isGranted) {
+      Get.snackbar(
+        'Phone permission',
+        'Phone permission is required to place calls.',
+        snackPosition: SnackPosition.BOTTOM,
+        mainButton: TextButton(
+          onPressed: () => openAppSettings(),
+          child: const Text('Settings'),
+        ),
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  /// On iOS, `twilio_voice` only completes the method-channel future for `setTokens`
+  /// after PushKit has delivered a VoIP device token. If `setTokens` runs before that,
+  /// the native side returns without ever calling `result`, and this await would hang
+  /// forever—so outgoing calls never start. We retry with short timeouts until the
+  /// native handler can return (token is cached on the native side after PushKit fires).
+  Future<void> _setTwilioTokens({
+    required String accessToken,
+    String? androidFcmToken,
+  }) async {
+    if (Platform.isAndroid) {
+      await TwilioVoice.instance.setTokens(
+        accessToken: accessToken,
+        deviceToken: androidFcmToken,
+      );
+      return;
+    }
+    if (!Platform.isIOS) {
+      await TwilioVoice.instance.setTokens(
+        accessToken: accessToken,
+        deviceToken: androidFcmToken,
+      );
+      return;
+    }
+
+    const step = Duration(milliseconds: 400);
+    final deadline = DateTime.now().add(const Duration(seconds: 25));
+    Object? lastError;
+
+    while (DateTime.now().isBefore(deadline)) {
+      try {
+        await TwilioVoice.instance
+            .setTokens(accessToken: accessToken, deviceToken: null)
+            .timeout(step);
+        return;
+      } on TimeoutException {
+        await Future.delayed(step);
+      } catch (e, st) {
+        lastError = e;
+        if (kDebugMode) {
+          debugPrint('Twilio setTokens retry: $e\n$st');
+        }
+        await Future.delayed(step);
+      }
+    }
+
+    throw lastError ?? TimeoutException('VoIP push token not ready for Twilio');
   }
 
   Future<void> registerPhoneAccountAndPrompt() async {
@@ -121,14 +207,17 @@ class CallController extends GetxController {
     print("✅ Phone account registered and enabled");
   }
 
-
   /// ✅ START CALL
   /// ✅ MAIN CALL FUNCTION
-  Future<void> makeCall(OrderList order,String customerPhone) async {
+  Future<void> makeCall(OrderList order, String customerPhone) async {
     try {
       orderData.value = order;
       // 1️⃣ Permissions
       if (!await _checkPermissions()) return;
+      Get.to<void>(
+        () => const OrderCallScreenPage(),
+        routeName: kOrderCallScreenRoute,
+      );
 
       final userId = await _userService.getUserId();
       final fcmToken = Platform.isAndroid ? await getFcmToken() : null;
@@ -139,14 +228,13 @@ class CallController extends GetxController {
         body: {'user_id': userId.toString()},
       );
 
-
       if (response.statusCode != 200) return;
       final accessToken = jsonDecode(response.body)['token'];
 
-      // 3️⃣ Set tokens
-      await TwilioVoice.instance.setTokens(
+      // 3️⃣ Set tokens (iOS waits for PushKit VoIP credential when needed)
+      await _setTwilioTokens(
         accessToken: accessToken,
-        deviceToken: fcmToken,
+        androidFcmToken: fcmToken,
       );
 
       // 4️⃣ Android only: register and verify Phone Account.
@@ -170,21 +258,28 @@ class CallController extends GetxController {
       // print(formatCountryPhoneNumber(customerPhone));
       // 6️⃣ Place call (ensure non-null 'to' and 'from')
       await TwilioVoice.instance.call.place(
-        to: formatToE164(customerPhone, order.customerPhoneCode.toString()), // +201099321668
+        to: formatToE164(
+          customerPhone,
+          order.customerPhoneCode.toString(),
+        ), // +201099321668
         // from: 'agent_$userId', // Twilio Client identity
         from: '+16592007176',
-        extraOptions: {'order_id':order.id.toString(),'tenant_id':order.tenantId.toString(),'call_note':''},
+        extraOptions: {
+          'order_id': order.id.toString(),
+          'tenant_id': order.tenantId.toString(),
+          'call_note': '',
+        },
       );
 
       print("✅ Call placed successfully");
     } catch (e) {
       print("Call Error: $e");
-      Get.snackbar("Call Error", e.toString());
+      final String message = e is TimeoutException && Platform.isIOS
+          ? 'Wait a few seconds after opening the app (VoIP setup), then try again.'
+          : e.toString();
+      Get.snackbar("Call Error", message);
     }
   }
-
-
-
 
   // Future<void> startCall({required String from, required String to}) async {
   //   var status = await Permission.microphone.request();
@@ -215,7 +310,10 @@ class CallController extends GetxController {
   void _startTimer() {
     _timer?.cancel();
     duration.value = 0;
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) => duration.value++);
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (t) => duration.value++,
+    );
   }
 
   void _stopTimer() {
@@ -234,5 +332,4 @@ class CallController extends GetxController {
     _timer?.cancel();
     super.onClose();
   }
-
 }

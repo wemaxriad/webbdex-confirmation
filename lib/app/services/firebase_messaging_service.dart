@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -38,6 +39,15 @@ class FirebaseMessagingService {
 
       // Set up background message handler
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+      // iOS foreground notification presentation (banner/sound/badge)
+      if (Platform.isIOS) {
+        await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      }
 
       // Handle notification taps when app is in background
       FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
@@ -179,6 +189,16 @@ class FirebaseMessagingService {
   /// Get FCM token
   Future<String?> _getFCMToken() async {
     try {
+      if (Platform.isIOS) {
+        // APNS token can arrive slightly later on iOS.
+        String? apnsToken = await _firebaseMessaging.getAPNSToken();
+        for (int i = 0; i < 6 && (apnsToken == null || apnsToken.isEmpty); i++) {
+          await Future<void>.delayed(const Duration(seconds: 1));
+          apnsToken = await _firebaseMessaging.getAPNSToken();
+        }
+        debugPrint('APNS Token: $apnsToken');
+      }
+
       _fcmToken = await _firebaseMessaging.getToken();
       debugPrint('FCM Token: $_fcmToken');
       // TODO: Send token to your backend server

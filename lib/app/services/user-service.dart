@@ -41,6 +41,16 @@ class UserService {
     }
   }
 
+  getAccountType() async {
+    prefs = await SharedPreferences.getInstance();
+    return prefs!.getString('accountType') ?? 'confirmation';
+  }
+
+  getUserType() async {
+    prefs = await SharedPreferences.getInstance();
+    return prefs!.getString('userType') ?? 'confirmation';
+  }
+
   getToken() async {
     prefs = await SharedPreferences.getInstance();
     if (prefs!.getString('token') != null) {
@@ -54,7 +64,10 @@ class UserService {
   removeSharedPreferenceData() async {
     prefs = await SharedPreferences.getInstance();
     prefs!.remove('is-user');
-    prefs!.remove('user-id');
+    prefs!.remove('userID');
     prefs!.remove('token');
+    prefs!.remove('accountType');
+    prefs!.remove('userType');
+    prefs!.remove('tenantID');
   }
 }

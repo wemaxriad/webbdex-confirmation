@@ -8,6 +8,7 @@ import '../../../services/api-list.dart';
 import '../../../utils/constant_colors.dart';
 import '../../../globalController/global_controller.dart';
 import '../../auth/controllers/auth_controller.dart';
+import '../../dashboard/controller/dashboard_controller.dart';
 import '../controller/profile_controller.dart';
 import 'confirmation_agent_documents_view.dart';
 import 'shimmer/profile_shimmer_view.dart';
@@ -114,19 +115,19 @@ class ProfileView extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // --- Menu List (Functional Section) ---
-            _buildMenuItem(
-              title: Get.find<GlobalController>().t("My Documents"),
-              icon: Icons.receipt_long,
-              onTap: () {
-                Get.to(
-                  () => const ConfirmationAgentDocumentsView(),
-                  transition: Transition.rightToLeft,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              },
-            ),
+            if (!(Get.isRegistered<DashboardController>() && Get.find<DashboardController>().isWebbyFirmUser))
+              _buildMenuItem(
+                title: Get.find<GlobalController>().t("My Documents"),
+                icon: Icons.receipt_long,
+                onTap: () {
+                  Get.to(
+                    () => const ConfirmationAgentDocumentsView(),
+                    transition: Transition.rightToLeft,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
 
             // --- Menu List (Functional Section) ---
             _buildMenuItem(

@@ -38,7 +38,7 @@ class DashboardView extends GetView<DashboardController> {
           case 1:
             return const OrderListView();
           case 2:
-            return const PaymentMainView();
+            return controller.isWebbyFirmUser ? const ProfileView() : const PaymentMainView();
           case 3:
             return const ProfileView();
           default:
@@ -88,7 +88,7 @@ class DashboardView extends GetView<DashboardController> {
                 );
               case 2:
                 return  Text(
-                  Get.find<GlobalController>().t("Payment"),
+                  Get.find<GlobalController>().t(controller.isWebbyFirmUser ? "Profile" : "Payment"),
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -168,7 +168,7 @@ class DashboardView extends GetView<DashboardController> {
               const SizedBox(width: 8),
               InkWell(
                 onTap: () {
-                  controller.currentIndex.value = 3;
+                  controller.currentIndex.value = controller.isWebbyFirmUser ? 2 : 3;
                 },
                 child: CircleAvatar(
                   radius: 16,
@@ -204,7 +204,7 @@ class DashboardView extends GetView<DashboardController> {
           if (controller.isLoading.value) {
             return const DashboardShimmerView();
           }
-          if(controller.userDetails.value?.confirmationAgentDetail?.status != 3) {
+          if(!controller.isWebbyFirmUser && controller.userDetails.value?.confirmationAgentDetail?.status != 3) {
             var status = controller.userDetails.value?.confirmationAgentDetail?.status??1;
             return DocumentStatusCard(
               isSubmitted: status == 1 ?false:status == 1 ? true:true,
@@ -392,7 +392,7 @@ class DashboardView extends GetView<DashboardController> {
 
   Widget _buildBottomNav() {
     return Obx(
-      () => (controller.userDetails.value?.confirmationAgentDetail?.status ?? 1) != 3
+      () => (!controller.isWebbyFirmUser && (controller.userDetails.value?.confirmationAgentDetail?.status ?? 1) != 3)
           ? SizedBox()
           :
       Container(
@@ -423,8 +423,9 @@ class DashboardView extends GetView<DashboardController> {
               tabs:  [
                 GButton(icon: Icons.home, text:  Get.find<GlobalController>().t("Home")),
                 GButton(icon: Icons.list_alt, text:  Get.find<GlobalController>().t("Order List")),
-                GButton(
-                    icon: Icons.monetization_on_outlined, text:  Get.find<GlobalController>().t("Withdraw")),
+                if (!controller.isWebbyFirmUser)
+                  GButton(
+                      icon: Icons.monetization_on_outlined, text:  Get.find<GlobalController>().t("Withdraw")),
                 GButton(icon: Icons.person, text:  Get.find<GlobalController>().t("Profile")),
               ],
             ),

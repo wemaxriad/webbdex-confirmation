@@ -54,21 +54,25 @@ class OrderListView extends GetView<MyOrdersController> {
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            value:
-                                globalController.countries.contains(
-                                  controller.selectedCountry.value,
-                                )
-                                ? controller.selectedCountry.value
-                                : globalController.countries.first,
+                            value: globalController.countries.isEmpty
+                                ? null
+                                : globalController.countries.contains(
+                                    controller.selectedCountry.value,
+                                  )
+                                    ? controller.selectedCountry.value
+                                    : globalController.countries.first,
+                            hint: Text(globalController.t('Select Country')),
                             isExpanded: true,
                             icon: const Icon(Icons.arrow_drop_down),
                             style: const TextStyle(
                               color: Colors.black,
                               fontSize: 16,
                             ),
-                            onChanged: (String? newValue) {
-                              controller.updateSelectedCountry(newValue);
-                            },
+                            onChanged: globalController.countries.isEmpty
+                                ? null
+                                : (String? newValue) {
+                                    controller.updateSelectedCountry(newValue);
+                                  },
                             items: globalController.countries
                                 .map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(

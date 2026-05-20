@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import '../../../globalController/global_controller.dart';
 import '../../../services/user-service.dart';
 import '../../../utils/constant_colors.dart';
 import '../model/orderDetailsModel.dart';
@@ -16,7 +17,7 @@ import 'order_call_controller.dart';
 class MyOrdersController extends GetxController {
   // --- Change Status Dialog State ---
   var selectedStatus = 'Select Status'.obs;
-  var selectedCountry = 'Egypt'.obs;
+  var selectedCountry = ''.obs;
   var assignSelectedStatus = 'Assign Order'.obs;
   var statusNotes = ''.obs;
   /// Attachment
@@ -55,14 +56,38 @@ class MyOrdersController extends GetxController {
   int confirmedOrderCurrentPage = 1;
   int confirmedOrderLastPage = 1;
   RxBool confirmedOrderIsMoreLoading = false.obs;
+  Worker? _countryWorker;
 
 
   @override
   void onInit() {
+    _syncSelectedCountry();
+    final globalController = Get.isRegistered<GlobalController>()
+        ? Get.find<GlobalController>()
+        : Get.put(GlobalController());
+    _countryWorker = ever(globalController.countries, (_) async {
+      if (_syncSelectedCountry()) {
+        await getOrderHistoryData(reset: true);
+      }
+    });
     getOrderHistoryData(reset: true); // 🔥 load on start
     getAssignOrderHistoryData(reset: true); // 🔥 load on start
     getConfirmedOrderHistoryData(reset: true); // 🔥 load on start
     super.onInit();
+  }
+
+  bool _syncSelectedCountry() {
+    if (!Get.isRegistered<GlobalController>()) {
+      return false;
+    }
+
+    final countries = Get.find<GlobalController>().countries;
+    if (countries.isEmpty || countries.contains(selectedCountry.value)) {
+      return false;
+    }
+
+    selectedCountry.value = countries.first;
+    return true;
   }
 
   Future<void> getOrderHistoryData({bool reset = false}) async {
@@ -76,7 +101,8 @@ class MyOrdersController extends GetxController {
       isLoading(reset);
       isMoreLoading(!reset);
 
-      final data = await _service.getOrderHistoryData(page: currentPage,search: pendingSearchCtrl.text,country:selectedCountry.value);
+      final country = selectedCountry.value.trim().isEmpty ? null : selectedCountry.value;
+      final data = await _service.getOrderHistoryData(page: currentPage,search: pendingSearchCtrl.text,country:country);
       if (data != null) {
         lastPage =  data.lastPage??1;
         orderList.addAll(data.orderList ?? []);
@@ -524,6 +550,15 @@ class MyOrdersController extends GetxController {
         ),
       ),
     );
+  }
+
+  @override
+  void onClose() {
+    _countryWorker?.dispose();
+    pendingSearchCtrl.dispose();
+    confirmedSearchCtrl.dispose();
+    assignSearchCtrl.dispose();
+    super.onClose();
   }
 
 }

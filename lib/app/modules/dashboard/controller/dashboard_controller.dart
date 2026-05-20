@@ -15,6 +15,7 @@ class DashboardController extends GetxController {
 
   // FIX: Add currentIndex for the bottom navigation bar management
   var currentIndex = 0.obs;
+  var accountType = 'confirmation'.obs;
 
   final DashboardService _service = DashboardService();
 
@@ -51,8 +52,15 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _loadAccountType();
     getDashboard();
   }
+
+  Future<void> _loadAccountType() async {
+    accountType.value = await userService.getAccountType();
+  }
+
+  bool get isWebbyFirmUser => accountType.value == 'webbyfirm';
 
   Future<void> getDashboard() async {
     try {

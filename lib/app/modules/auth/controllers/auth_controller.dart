@@ -80,6 +80,11 @@ class AuthController extends GetxController {
         userService.saveBoolean(key: 'is-user', value: true);
         userService.saveString(key: 'token', value: loginData.token);
         userService.saveString(key: 'userID', value: loginData.users?.id.toString());
+        userService.saveString(key: 'accountType', value: loginData.users?.accountType ?? 'confirmation');
+        userService.saveString(key: 'userType', value: loginData.users?.userType?.toString() ?? 'confirmation');
+        if (loginData.users?.tenantId != null) {
+          userService.saveString(key: 'tenantID', value: loginData.users?.tenantId);
+        }
         isUser.value = true;
 
         Server.initToken(token: bearerToken);
@@ -128,6 +133,11 @@ class AuthController extends GetxController {
         userService.saveBoolean(key: 'is-user', value: true);
         userService.saveString(key: 'token', value: loginData.token);
         userService.saveString(key: 'userID', value: loginData.users?.id.toString());
+        userService.saveString(key: 'accountType', value: loginData.users?.accountType ?? 'confirmation');
+        userService.saveString(key: 'userType', value: loginData.users?.userType?.toString() ?? 'confirmation');
+        if (loginData.users?.tenantId != null) {
+          userService.saveString(key: 'tenantID', value: loginData.users?.tenantId);
+        }
         isUser.value = true;
 
         Server.initToken(token: bearerToken);
@@ -193,6 +203,8 @@ class AuthController extends GetxController {
           userService.saveBoolean(key: 'is-user', value: true);
           userService.saveString(key: 'token', value: refreshData.token);
           userService.saveString(key: 'userID', value: refreshData.users!.id.toString());
+          userService.saveString(key: 'accountType', value: refreshData.users?.accountType ?? 'confirmation');
+          userService.saveString(key: 'userType', value: refreshData.users?.userType?.toString() ?? 'confirmation');
           Server.initToken(token: newToken);
           Get.offNamed(AppRoutes.DASHBOARD);
           return true;
@@ -330,10 +342,11 @@ class AuthController extends GetxController {
         return;
       }
 
+      final accountType = await userService.getAccountType();
       Map body = {
         "device_token": fcmToken,
         "platform": Platform.isAndroid ? "android" : "ios",
-        "user_type": "confirmation",
+        "user_type": accountType == 'webbyfirm' ? "webbyfirm" : "confirmation",
       };
       String jsonBody = json.encode(body);
       

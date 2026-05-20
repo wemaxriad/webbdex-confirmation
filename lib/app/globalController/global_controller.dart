@@ -37,9 +37,15 @@ class GlobalController extends GetxController {
   }
 
   Future<void> getCountryList() async {
-    final response = await server.getRequest(
-      endPoint: ApiList.countryList!,
-    );
+    final savedToken = await userService.getToken();
+    final token = savedToken ?? Server.bearerToken;
+    if (token != null && token != 'null') {
+      Server.initToken(token: token);
+    }
+
+    final response = token != null && token != 'null'
+        ? await server.getRequestToken(endPoint: ApiList.countryList!)
+        : await server.getRequest(endPoint: ApiList.countryList!);
 
     if (response == null) {
       debugPrint("API response is null");

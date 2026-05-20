@@ -28,6 +28,8 @@ class CallController extends GetxController {
   Rx<OrderList?> orderData = Rx<OrderList?>(null);
   StreamSubscription<CallEvent>? _callSubscription;
   Timer? _timer;
+  int? _maxCallSeconds;
+  bool _isWebbyFirmCall = false;
 
   @override
   void onInit() {
@@ -46,7 +48,20 @@ class CallController extends GetxController {
       if (event == CallEvent.callEnded ||
           event == CallEvent.declined ||
           event == CallEvent.missedCall) {
+        final bool endedByBalanceLimit = _isWebbyFirmCall &&
+            _maxCallSeconds != null &&
+            duration.value >= (_maxCallSeconds! - 5);
         _stopTimer();
+
+        if (endedByBalanceLimit) {
+          Get.snackbar(
+            "Out of balance",
+            "Recharge your tenant wallet to continue calling.",
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
 
         // Close call screen safely
         if (Get.isOverlaysOpen ?? false) {
@@ -214,22 +229,42 @@ class CallController extends GetxController {
       orderData.value = order;
       // 1️⃣ Permissions
       if (!await _checkPermissions()) return;
-      Get.to<void>(
-        () => const OrderCallScreenPage(),
-        routeName: kOrderCallScreenRoute,
-      );
 
       final userId = await _userService.getUserId();
+      final token = await _userService.getToken();
       final fcmToken = Platform.isAndroid ? await getFcmToken() : null;
 
       // 2️⃣ Fetch Twilio token
       final response = await http.post(
         Uri.parse('${ApiList.orderCallToken}'),
+        headers: {
+          if (token != null) 'Authorization': token,
+          'Accept': 'application/json',
+        },
         body: {'user_id': userId.toString()},
       );
 
-      if (response.statusCode != 200) return;
-      final accessToken = jsonDecode(response.body)['token'];
+      if (response.statusCode != 200) {
+        try {
+          final body = jsonDecode(response.body);
+          Get.snackbar(
+            body['out_of_balance'] == true ? "Out of balance" : "Call Error",
+            body['message']?.toString() ?? "Unable to start call",
+          );
+        } catch (_) {
+          Get.snackbar("Call Error", "Unable to start call");
+        }
+        return;
+      }
+      final tokenBody = jsonDecode(response.body);
+      final accessToken = tokenBody['token'];
+      _isWebbyFirmCall = tokenBody['account_type'] == 'webbyfirm';
+      _maxCallSeconds = int.tryParse(tokenBody['max_call_seconds']?.toString() ?? '');
+
+      Get.to<void>(
+        () => const OrderCallScreenPage(),
+        routeName: kOrderCallScreenRoute,
+      );
 
       // 3️⃣ Set tokens (iOS waits for PushKit VoIP credential when needed)
       await _setTwilioTokens(
@@ -267,6 +302,7 @@ class CallController extends GetxController {
         extraOptions: {
           'order_id': order.id.toString(),
           'tenant_id': order.tenantId.toString(),
+          'user_id': userId.toString(),
           'call_note': '',
         },
       );

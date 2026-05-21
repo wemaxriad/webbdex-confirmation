@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
 // Local imports
 import '../../../globalController/global_controller.dart';
-import '../../auth/controllers/auth_controller.dart';
 import '../../profile/controller/profile_controller.dart';
 import '../controller/dashboard_controller.dart';
 import '../../balance/view/balance_view.dart';
@@ -14,6 +12,7 @@ import '../../balance/controller/balance_controller.dart';
 // Important: Global Controller for Custom AppBar
 import '../../profile/view/profile_view.dart'; // Ensure ProfileView is imported
 // ... (Other imports)
+import '../../direct_call/view/direct_call_view.dart';
 import '../../order/view/order_list_view.dart';
 import 'documentStatusCard.dart';
 import 'shimmer/dashboard_shimmer_view.dart'; // Import the new file
@@ -38,7 +37,7 @@ class DashboardView extends GetView<DashboardController> {
           case 1:
             return const OrderListView();
           case 2:
-            return controller.isWebbyFirmUser ? const ProfileView() : const PaymentMainView();
+            return controller.isWebbyFirmUser ? const DirectCallView() : const PaymentMainView();
           case 3:
             return const ProfileView();
           default:
@@ -88,7 +87,7 @@ class DashboardView extends GetView<DashboardController> {
                 );
               case 2:
                 return  Text(
-                  Get.find<GlobalController>().t(controller.isWebbyFirmUser ? "Profile" : "Payment"),
+                  Get.find<GlobalController>().t(controller.isWebbyFirmUser ? "Direct Call" : "Payment"),
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -168,7 +167,7 @@ class DashboardView extends GetView<DashboardController> {
               const SizedBox(width: 8),
               InkWell(
                 onTap: () {
-                  controller.currentIndex.value = controller.isWebbyFirmUser ? 2 : 3;
+                  controller.currentIndex.value = 3;
                 },
                 child: CircleAvatar(
                   radius: 16,
@@ -307,7 +306,7 @@ class DashboardView extends GetView<DashboardController> {
                       height: 300,
                       child: ListView.separated(
                         itemCount: controller.lastOrders.length,
-                        separatorBuilder: (_, __) => const Divider(),
+                        separatorBuilder: (context, index) => const Divider(),
                         itemBuilder: (_, index) {
                           final order = controller.lastOrders[index];
                           return ListTile(
@@ -340,14 +339,14 @@ class DashboardView extends GetView<DashboardController> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "$value",
+              value,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -401,7 +400,7 @@ class DashboardView extends GetView<DashboardController> {
           boxShadow: [
             BoxShadow(
               blurRadius: 8,
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
             ),
           ],
         ),
@@ -426,6 +425,8 @@ class DashboardView extends GetView<DashboardController> {
                 if (!controller.isWebbyFirmUser)
                   GButton(
                       icon: Icons.monetization_on_outlined, text:  Get.find<GlobalController>().t("Withdraw")),
+                if (controller.isWebbyFirmUser)
+                  GButton(icon: Icons.dialpad, text:  Get.find<GlobalController>().t("Dial")),
                 GButton(icon: Icons.person, text:  Get.find<GlobalController>().t("Profile")),
               ],
             ),
@@ -458,7 +459,7 @@ class ReviewStatusCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.15),
+                color: Colors.orange.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
